@@ -2,29 +2,110 @@ package harm;
 
 import java.awt.AWTException;
 import java.awt.Robot;
-import java.awt.SystemTray;
-import java.awt.TrayIcon;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.swing.ImageIcon;
-
 
 public class TESTMAIN {
+	
+	public String b = "java";
+	public String c = new String("java");
+	
+	@Override
+	public String toString() {
+		return super.toString();
+	}
+	
+	
+	
 	public static void main(String[] args) throws Exception{
-///* 
+		
+		////
+		String a = "java";
+		String b = new String("java");
+		
+		TESTMAIN t = new TESTMAIN();
+		String d = t.b;
+		
+		if(a==d) {
+			System.out.println("??");
+		} else {
+			System.out.println("!!");
+		}
+		
+		System.out.println(t.toString());
+		
+/* java wrapping class test
+        Integer wi = new Integer(3);
+        wi = 4;
+        System.out.println(wi);
+        int si = wi;
+        
+        System.out.println(si);
+        si++;
+        System.out.println("" + wi + "/" + si);
+        TESTMAIN tm = new TESTMAIN();
+        tm.javaIntegerClassParamTest(wi, si);
+        System.out.println("" + wi + "/" + si);
+        
+        Boolean wb = new Boolean(true);
+        boolean sb = true;
+        System.out.println("" + wb + "/" + sb);
+        tm.javaBooleanClassParamTest(wb, sb);
+        System.out.println("" + wb + "/" + sb);
+*/
+/* function name test
+		TESTMAIN main = new TESTMAIN();
+		System.out.println(main.getClass());
+		main.getFucntionName();
+*/
+		
+		
+/* for loop index test
+		int i2 = 0;
+		int i3 = 0;
+		//9 times
+		for(int i = 0; i<10; i++, i2++) {
+			i3++;
+			System.out.println("========lab : " + i);
+			System.out.println("i2 : " + i2);
+			System.out.println("i3 : " + i3);
+		}
+		System.out.println("result i2 : " + i2);
+		System.out.println("result i3 : " + i3);
 
-//*/
+*/
+/* Integer.parseInt test
+		System.out.println(Integer.parseInt("haha"));
+		*/
+/* hashtable test
+		Hashtable<String, Hashtable> htable = new Hashtable<String, Hashtable>();
+		Hashtable<String, String> ht1 = new Hashtable<>(); ht1.put("id", "t01"); ht1.put("pw", "1234");
+		Hashtable<String, String> ht2 = new Hashtable<>(); ht2.put("id", "t02"); ht2.put("pw", "4321");
+		htable.put("001", ht1);
+		htable.put("002", ht2);
+		Hashtable<String, String> temp = null;
+		temp = htable.get("001");
+		temp.put("id", "t03");
+		System.out.println(htable.get("001").get("id"));
+		
+*/
+		
+/* java param test
+		TESTMAIN main = new TESTMAIN();
+		CClass c = new CClass();
+		c.cname = "new name!";
+		int cn = 5;
+		System.out.println(c.cname + "/" + cn);
+		main.javaParamTest(c, cn);
+		System.out.println(c.cname + "/" + cn);
+*/
 		
 /* system tray test
 		System.out.println("tray test start");
@@ -200,7 +281,29 @@ public class TESTMAIN {
 		sseq = Integer.toString((Integer.parseInt(sseq) + 1));
 		System.out.println(sseq);
 */
-		
+//simple calendar test3////////////////////////////////////////////////////////////////
+//		String test = "20140303111213";
+//		String closing_time = "20140322010001";
+//		String current_time = "20140323010000";
+//		System.out.println(closing_time + "\n" + current_time);
+//		SimpleDateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");
+//		
+//		Date clsDate = df.parse(closing_time);
+//		Date curDate = df.parse(current_time);
+//		
+//		long diffSec = (curDate.getTime()-clsDate.getTime())/1000;
+//
+//		final int YEAR_CONVERT_CONSTANT = 60*60*24*30*12;
+//		final int MONTH_CONVERT_CONSTANT = 60*60*24*30;
+//		final int DAY_CONVERT_CONSTANT = 60*60*24;
+//		System.out.println(diffSec/DAY_CONVERT_CONSTANT);
+//		int diffY = (int)(diffSec/YEAR_CONVERT_CONSTANT);
+//		int diffM = (int)(diffSec%YEAR_CONVERT_CONSTANT/MONTH_CONVERT_CONSTANT);
+//		int diffD = (int)(diffSec/DAY_CONVERT_CONSTANT);
+//		System.out.println("" + diffY + "/" + diffM + "/" + diffD);
+//		
+//		System.out.println(df.format(new Date()));
+//////////////////////////////////////////////////////////////////////////////////////
 /* simple calendar test3
 		SimpleDateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");
 		String amount = "006";
@@ -225,21 +328,22 @@ public class TESTMAIN {
 		
 		//19700101090000
 */
-/* simple calendar test
-		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
-		String time = null;
-		Date dat1, dat2;
-		Calendar cal = Calendar.getInstance(); 
-		cal.setTime(new Date());
-		dat1 = cal.getTime();
-		cal.add(Calendar.MINUTE, -1);
-		dat2 = cal.getTime();
-				
-		System.out.println("dat1 : " + dateFormat.format(dat1));
-		System.out.println("dat2 : " + dateFormat.format(dat2));
 		
-		System.out.println(dat2.after(dat1));
-		//System.out.println(dat2.compareTo(dat1)); // -1 return means dat2 is before than dat1
+///* simple calendar test
+//		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
+//		String time = null;
+//		Date dat1, dat2;
+//		Calendar cal = Calendar.getInstance(); 
+//		cal.setTime(new Date());
+//		dat1 = cal.getTime();
+//		//cal.add(Calendar.MINUTE, +31);
+//		dat2 = cal.getTime();
+//				
+//		System.out.println("dat1 : " + dateFormat.format(dat1));
+//		System.out.println("dat2 : " + dateFormat.format(dat2));
+//		
+//		System.out.println(dat1.before(dat2));
+//		System.out.println(dat2.compareTo(dat1)); // -1 return means dat2 is before than dat1
 		
 //		cal.setTime((Date)dateFormat.parse(time));
 //		dat1 = cal.getTime();
@@ -251,7 +355,7 @@ public class TESTMAIN {
 //		
 //		System.out.println(dat1.compareTo(dat2)); // 1 return means dat1 is after than dat1
 //		System.out.println(dat2.compareTo(dat1)); // -1 return means dat2 is before than dat1
-*/
+//*/
 		
 /*//variable test
 		TESTCLASS t1 = new TESTCLASS();
@@ -400,6 +504,22 @@ public class TESTMAIN {
 		return result;
 	}
 	
+	public void javaBooleanClassParamTest(Object wb, boolean sb) {
+		System.out.println(Thread.currentThread().getStackTrace()[1].getMethodName() + " start");
+		wb = (!(Boolean)wb);
+		sb = !sb;
+		System.out.println("" + wb + "/" + sb);
+		System.out.println(Thread.currentThread().getStackTrace()[1].getMethodName() + " end");
+	}
+	
+	public void javaIntegerClassParamTest(Object wi, int si) {
+		System.out.println(Thread.currentThread().getStackTrace()[1].getMethodName() + " start");
+		wi = (Integer)wi + 1;
+		++si;
+		System.out.println("" + wi + "/" + si);
+		System.out.println(Thread.currentThread().getStackTrace()[1].getMethodName() + " end");
+	}
+	
 	public ArrayList<Integer> getPrimeNumberList2(Integer max) {
 		ArrayList<Integer> result = new ArrayList<Integer>();
 		//not to do x/2 x/4 x/6
@@ -408,6 +528,12 @@ public class TESTMAIN {
 		return result;
 	}
 	
+	public void javaParamTest(CClass c, int n) {
+		c.cname = "after Test";
+		n++;
+	}
+	
+
 		
 	public void functionCheck(){
 		System.out.println("=================================");
