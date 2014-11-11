@@ -1,0 +1,115 @@
+﻿javascript:(
+function() {
+	/*JQUERY LOAD DYNAMICALLY*/
+	var done = false;
+	var v = "1.3.2";
+
+	/*IF PAGE HAS NO JQUERY OR JQUERY VERSION LOW*/
+	if(window.jQuery == undefined || window.jQuery.fn.jQuery < v) {
+		var script = document.createElement("script");
+		script.src = "http://ajax.googleapis.com/ajax/libs/jquery/" + v + "/jquery.min.js";
+		script.onload = script.onReadyStateChange =
+			function() {
+				if(	!done	&&
+						(	!this.readyState							||
+							this.readyState == "loaded"		||
+							this.readyState == "complete"		)
+				) {
+					console.log("jQuery load ok");
+					done = true;
+					initBookmarklet();
+				}
+			}; /*END OF DEFINITION OF SCRIPT ONLREADY FUNCTION*/
+		document.getElementsByTagName("head")[0].appendChild(script);
+	} else { /*END OF JQUERY VERSION CHECK*/
+		initBookmarklet();
+	}
+
+		
+	function initBookmarklet() {
+			console.log("initBookmarklet()");
+			if (document.getElementById('endicIframe')) {
+				return;
+			}
+			
+			var iframe = document.createElement('iframe');
+			var closeBtn = document.createElement('button');
+			var endicUrl = 
+				/*DAUM SMALL*/
+				'http://small.dic.daum.net/search.do?q=';
+				/*GOOGLE SERVER BLOCKED*//*'https://translate.google.com/?hl=ko#en/ko/';*/
+				/*NAVER SERVER BLOCKED*//*'http://endic.naver.com/popManager.nhn?m=search';*/
+			var hideRightPx = "-380px";
+			var showRightPx = "0px";
+			
+			iframe.id = 'endicIframe';
+			iframe.style.position = 'fixed';
+			iframe.style.top = 0;
+			iframe.style.right = hideRightPx;
+			iframe.style.zIndex = 10000;
+			iframe.style.border = '1px solid #ddd';
+			iframe.style.background = 'white';
+			
+			iframe.style.width = '400px';
+			iframe.style.height = '400px';
+			
+			iframe.src = endicUrl;
+
+			closeBtn.id = 'endicCloseBtn';
+			closeBtn.style.position = 'fixed';
+			closeBtn.style.top = iframe.style.top;
+			closeBtn.style.right = iframe.style.right;
+			closeBtn.style.zIndex = 11000;
+			closeBtn.style.border = iframe.style.border;
+			closeBtn.style.background = iframe.style.background;
+
+			closeBtn.type = 'button';			
+			closeBtn.style.padding = '7px 10px';
+			closeBtn.innerHTML = 'close';
+			
+			var dblclickHandler =
+				function() {
+					console.log("dblclickHandler");
+					var query = document.getSelection().toString();
+					if (query) {
+						iframe.src = endicUrl + query;
+						$("#endicIframe").animate({right:showRightPx});
+						$("#endicCloseBtn").animate({right:showRightPx});
+					} else {
+						$("#endicIframe").animate({right:hideRightPx});
+						$("#endicCloseBtn").animate({right:hideRightPx});
+					}
+				};
+			var mouseupHandler =
+				function() {
+					console.log("mouseup");
+					var query = document.getSelection().toString();
+					if (query) {
+						iframe.src = endicUrl + query;
+						$("#endicIframe").animate({right:showRightPx});
+						$("#endicCloseBtn").animate({right:showRightPx});
+					} else {
+						$("#endicIframe").animate({right:hideRightPx});
+						$("#endicCloseBtn").animate({right:hideRightPx});
+					}
+				};
+
+			
+			closeBtn.onclick =
+				function () {
+				    document.body.removeChild(iframe);
+				    document.body.removeChild(closeBtn);
+				    document.removeEventListener('dblclick', dblclickHandler, false);
+				    document.removeEventListener('mouseup', mouseupHandler, false);
+				};
+			
+			document.body.appendChild(iframe);
+			document.body.appendChild(closeBtn);
+			document.addEventListener('dblclick', dblclickHandler, false);
+			document.addEventListener('mouseup', mouseupHandler, false);
+
+	}	/*END OF FUNCTION initBookmarklet*/
+	
+
+	
+})();	/*END OF BOOKMARKLET*/

@@ -1,0 +1,43 @@
+﻿javascript:(	function() {
+		
+		if (document.getElementById('endicIframe')) {
+			return;
+		}		
+		var iframe = document.createElement('iframe');
+		var closeBtn = document.createElement('button');
+		var endicUrl = 'http://endic.naver.com/popManager.nhn?m=search';
+		
+		iframe.id = 'endicIframe';
+		iframe.src = endicUrl;
+		iframe.style.position = 'fixed';
+		iframe.style.top = 0;
+		iframe.style.right = 0;
+		iframe.style.width = '400px';
+		iframe.style.height = '400px';
+		iframe.style.border = '1px solid #ddd';
+		iframe.style.background = 'white';
+		iframe.style.zIndex = 10000;
+		
+		closeBtn.type = 'button';
+		closeBtn.style.border = '1px solid #ddd';
+		closeBtn.style.background = 'white';
+		closeBtn.innerHTML = 'close';
+		closeBtn.onclick = function () {
+			    document.body.removeChild(iframe);
+			    document.body.removeChild(closeBtn);
+			    };
+		closeBtn.style.position = 'fixed';
+		closeBtn.style.top = 0;
+		closeBtn.style.right = 0;
+		closeBtn.style.padding = '7px 10px';
+		closeBtn.style.zIndex = 11000;
+		document.body.appendChild(iframe);
+		document.body.appendChild(closeBtn);
+		document.addEventListener('mouseup', function () {
+												var query = document.getSelection().toString();
+												if (query) {
+													iframe.src = endicUrl + '&query=' + query;
+												}
+											}, false);
+		}
+)();

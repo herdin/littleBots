@@ -1,0 +1,33 @@
+﻿javascript:(
+	function() {
+/*START OF fucntion()*/
+
+		var i = 0;
+		var parentNode;
+		var delItem;
+		var delItemList = new Array();
+		var iframeList = document.getElementsByTagName("iframe");
+		
+		for(i = 0; i<iframeList.length; i++) {
+			/*alert(iframeList[i].src);*/
+			parentNode = iframeList[i].parentNode;
+			parentNode.removeChild(iframeList[i]);
+		}
+
+		delItemList.push("main_right_Floating_banner");
+		delItemList.push("zdnet_banner_layout");
+		delItemList.push("tbFadeIn");
+		delItemList.push("scrollDiv");
+		delItemList.push("divMenu");
+		
+		while(delItemList.length > 0) {
+			console.log("delItemList.length : " + delItemList.length);
+			delItem = document.getElementById(delItemList.pop());
+			if(delItem != null) {
+				parentNode = delItem.parentNode;
+				parentNode.removeChild(delItem);
+			}
+		}
+		
+/*END OF function()*/
+})();

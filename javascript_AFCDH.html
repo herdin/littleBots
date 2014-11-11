@@ -1,0 +1,1436 @@
+﻿<!DOCTYPE html>
+<html>
+<head><title>AFC BIZFRAMEWORK BEAN/DAO/FIELDHANDLER/JUNIT/QUERY GENERATOR</title>
+<!-- SEARCH FOR MORE GOOGLE FONT! -->
+<link href='http://fonts.googleapis.com/css?family=Shadows+Into+Light' rel='stylesheet' type='text/css'>
+<link href='http://fonts.googleapis.com/css?family=Audiowide' rel='stylesheet' type='text/css'>
+<link href='http://fonts.googleapis.com/css?family=Bangers' rel='stylesheet' type='text/css'>
+<style type="text/css">
+	@import url(http://fonts.googleapis.com/earlyaccess/nanumgothic.css);
+	body, button, div, input, textarea, pre, select{
+		font-size : 12px;
+		font-family:	'Nanum Gothic';
+		font-backup:	'Audiowide',
+									'Shadows Into Light',
+									'Bangers',
+									cursive;
+									
+	}
+</style>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+<script>
+/////////////////ICON FACTORY
+//https://www.iconfinder.com/icons/54090/config_icon#size=16
+
+//////////////////////////////////
+///////////////////GLOBAL VARIABLE
+//////////////////////////////////
+var DEBUG = true;
+console.log("DEBUG MODE : " + DEBUG);
+
+var MYSQL_LATEX_PRIMARY = "PRI";
+var MYSQL_LATEX_NOT_NULL = "NO";
+//////////////////////////////////
+///////////////////GLOBAL FUNCTION
+//////////////////////////////////
+function debugprint(debugStr) {
+	if(DEBUG) {
+		console.log(debugStr);
+	}
+}//END OF debugprint()
+
+//////////////////////////////////
+///////////DOCUMENT READY FUNCTION
+//////////////////////////////////
+$(document).ready(function(){
+	
+	/*
+	$("#inputbox").click(function(){
+		$("#inputbox").val("");
+	});
+	*/
+	//////////////////////////////////
+	/////////////SAVE YOUR TIME BUTTON
+	//////////////////////////////////
+	$("#btn").click(function(){
+		
+		var ORACLE	= $("#slctOpt_oracle").val();
+		var MYSQL		= $("#slctOpt_mysql").val();
+		var VARIETY	= $("#slctOpt_variety").val();
+		
+		var dataType = $("#slct option:selected").val();
+		
+		var ERR_INVALID_DB_TYPE = "Set your dataBaseType properly.";
+		var ERR_MYSQL_COLUMNS_PARSING = "Column parsed wrong.";
+		
+		var DEFAULT_TABLE_PHYSICAL_NAME = "(PHYSICALNAME)";
+		var DEFAULT_TABLE_LOGICAL_NAME  = "(LOGICALNAME)";
+		var DEFAULT_PACKAGE_NAME = "(PACKAGENAME)";
+		var table_physical_name = $("#table_physical_name").val().length <= 0 ? DEFAULT_TABLE_PHYSICAL_NAME:$("#table_physical_name").val();
+		var table_logical_name  = $("#table_logical_name").val().length  <= 0 ? DEFAULT_TABLE_LOGICAL_NAME:$("#table_logical_name").val();
+		var package_name = $("#package_name").val().length <= 0 ? DEFAULT_PACKAGE_NAME : $("#package_name").val();
+		$("#table_physical_name").val(table_physical_name);
+		$("#table_logical_name").val(table_logical_name);
+		$("#package_name").val(package_name);
+
+		var inputs = $("#inputbox").val();	//input from inputbox
+		var output = "";
+		var arr;														//MAIN Array for all routine
+		var patt;
+
+		//VARIABLE FOR MYSQL
+		var arr_field = new Array();
+		var arr_type = new Array();
+		var arr_null = new Array();
+		var arr_key = new Array();
+		var arr_default = new Array();
+		var arr_extra = new Array();
+
+		debugprint("selected option : " + dataType);
+
+/////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////MAKING MAIN ARRAY : arr
+/////////////////////////////////////////////////////////////////////////
+		if(dataType == ORACLE) {
+		//////////////////////////////////
+		////////////////////////////ORACLE
+		//////////////////////////////////
+			
+			//pattern below : use pl/sql, table right click describe
+			patt = /[A-Za-z0-9_()\"]+/g;			//regEx for all columns except [\n][,][ ]
+			arr = inputs.match(patt);					//array per line
+			
+		} else if(dataType == MYSQL) {
+		//////////////////////////////////
+		/////////////////////////////MYSQL
+		//////////////////////////////////
+			/*
+			\begin{tabular}{ c  c  c  c  c  c }
+			CARD_NUM & varchar(16) & NO & PRI &  & \\ 
+			BEF_AUTOLOAD_DATE & varchar(14) & NO & PRI & N & \\ 
+			REGION_ID & varchar(3) & YES &  &  & \\ 
+			AGENCY_ID & varchar(3) & YES &  &  & \\ 
+			\end{tabular}
+			*/
+			//////////////////////////////////
+			//////REMOVE begin, end LINE START
+			//////////////////////////////////
+			output = "";
+			patt = /[a-zA-Z0-9() &_,{}]+(\\\\){1}/g;	//FIND "SOMETHING" + "\\" LINE
+			arr = inputs.match(patt);
+			for(var i=0; i<arr.length; i++) {
+				output = output + arr[i] + "\n";
+			}
+			
+			/*
+			CARD_NUM & varchar(16) & NO & PRI &  & \\ 
+			BEF_AUTOLOAD_DATE & varchar(14) & NO & PRI & N & \\ 
+			REGION_ID & varchar(3) & YES &  &  & \\ 
+			AGENCY_ID & varchar(3) & YES &  &  & \\ 
+			*/
+			//////////////////////////////////
+			/////////////FIND WORD EXCEPT & \\
+			//////////////////////////////////
+			patt = /[\w(), ]+/g;					
+			var patt_space = /[ ]/g;
+			arr = output.match(patt);
+			
+			//////////////////////////////////
+			//////ORGANIZE ATTRIBUTE TO ARRAYS
+			//////////////////////////////////
+			for(var i=0; i<arr.length; i++) {
+				var j = i%6;
+				//outputs = outputs + j + " " + arr[i] + "\n";
+				switch(j) {
+					case 0://field
+						arr_field[arr_field.length] = arr[i].replace(patt_space, "");			break;
+					case 1://type
+						arr_type[arr_type.length] = arr[i].replace(patt_space, "");				break;
+					case 2://null
+						arr_null[arr_null.length] = arr[i].replace(patt_space, "");				break;
+					case 3://key
+						arr_key[arr_key.length] = arr[i].replace(patt_space, "");					break;
+					case 4://default
+						arr_default[arr_default.length] = arr[i].replace(patt_space, "");	break;
+					case 5://extra
+						arr_extra[arr_extra.length] = arr[i].replace(patt_space, "");			break;
+					default:																														break;
+				}//END OF SWITCH
+			}//END OF FORLOOP
+			
+			//DEBUG
+			/*for(var i=0; i<arr_field.length; i++) {
+				debugprint( "" + i + " : " + arr_field[i]);
+			}*/
+			
+			//////////////////////////////////
+			/////////////////MAKING MAIN ARRAY
+			//////////////////////////////////
+			output = "";
+			for(var i=0; i<arr_field.length; i++) {
+				output = output + arr_field[i] + "\n";
+			}
+			patt = /[\w_]+/g;
+			arr = output.match(patt);
+			
+			//////////////////////////////////
+			///////CONVERT INPUT TO DB COLUMNS
+			//////////////////////////////////
+			$("#inputbox").val(output);
+			
+			/*//OLD PROCESS
+			//pattern below : use heidiSQL, 격자내보내기, laTex format
+			//REGION_ID & varchar(3) & NO & MUL &  & \\
+			//DEVICE_COMM_TRANSM_CYCLE & decimal(3,0) & YES &  &  & \\ 
+			var patt2;
+			patt = /[A-Z]+[A-Z0-9_]+( & )[a-z]/g;	//regEx for [REGION_ID & v]
+			patt2 = /[A-Z0-9_]+/g;								//regEx for [REGION_ID]
+			
+			arr = inputs.match(patt);					//array per line
+		
+			if(arr != null) {
+				for(var i=0; i<arr.length; i++){
+					var str = arr[i];
+					str = str.match(patt2);					//find real column name
+					output = output + str[0] + "\n";
+				}
+			} else {
+				patt = /[A-Za-z0-9_()\"]+/g;	
+				arr = inputs.match(patt);
+				for(var i=0; i<arr.length; i++){
+					var str = arr[i];
+					output = output + str + "\n";
+				}
+			}
+			
+			$("#inputbox").val(output);
+			
+			patt = /[A-Za-z0-9_()\"]+/g;
+			arr = output.match(patt);
+			*/
+		} else {
+		//////////////////////////////////
+		/////////////////////////EXCEPTION
+		//////////////////////////////////
+			alert(ERR_INVALID_DB_TYPE);
+			return;
+		}
+
+/////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////MAKE DAO CONTENTS
+/////////////////////////////////////////////////////////////////////////
+		var pattPhysicalName = /XPHYSICALX/g;
+		var pattLogicalName = /XLOGICALX/g;
+		var pattPackageName = /XPACKAGEX/g;
+
+		output = "";
+		output = $("#inputbox_for_dao").val().replace(pattPhysicalName, table_physical_name);
+		output = output.replace(pattLogicalName, table_logical_name);
+		output = output.replace(pattPackageName, package_name);
+		
+		if(dataType == MYSQL) {
+		//////////////////////////////////
+		/////////////////////////////MYSQL
+		//////////////////////////////////
+			var pattClosed = /\/closed/g;
+			output = output.replace(pattClosed, "");	
+		}
+		
+		$("#outputbox_for_dao").val(output);
+		
+/////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////MAKE JUNIT CONTENTS
+/////////////////////////////////////////////////////////////////////////
+		var pattJunit01 = /XSET_CODEX/g;
+		var pattJunit02 = /XGET_FUNCX/g;
+		var pattJunit03 = /XSET_CRUD_BEANSX/g;
+		var setCRUDBeans = "";
+		
+		output = "";
+		output = $("#inputbox_for_junit").val().replace(pattLogicalName, table_logical_name);
+
+		if(dataType == ORACLE) {
+		//////////////////////////////////
+		////////////////////////////ORACLE
+		//////////////////////////////////
+			setCRUDBeans =
+				"\t\tbean.setFunction(\"SET_CODE\");\n" +
+				"\t\tbean.setFunction(\"SET_CODE\");";
+			output = output.replace(pattJunit02, "");
+			output = output.replace(pattJunit03, setCRUDBeans);
+			
+		} else if(dataType == MYSQL) {
+		//////////////////////////////////
+		/////////////////////////////MYSQL
+		//////////////////////////////////
+			var pattCamelFirst = /([A-Za-z0-9]+_)/g;
+			var pattCamelRest = /(_[A-Za-z0-9]+)/g;
+			var functionNames = new Array();
+			var temp;
+
+			//	1/3
+			output = output.replace(pattJunit01, arr_field[0]);
+
+			for(var i=0; i<arr_field.length; i++) {
+				
+				//debugprint(i);
+				
+				if(arr_field[i].search("_") == -1) {
+					functionNames[functionNames.length] = arr_field[i].toLowerCase();
+				} else {
+					functionNames[functionNames.length] = "";
+					
+					temp = arr_field[i].match(pattCamelFirst);
+					for(var j=0; j<temp.length; j++) {
+						functionNames[i] +=
+							temp[j].substring(0, 1).toUpperCase() +
+							temp[j].substring(1, temp[j].length-1).toLowerCase();
+					}
+					
+					temp = arr_field[i].match(pattCamelRest);
+					var last = temp[temp.length-1].toLowerCase();
+					functionNames[i] +=
+						last.substring(1, 2).toUpperCase() +
+						last.substring(2, last.length);
+					
+				}//END OF IF/ELSE
+				//debugprint(functionNames[i]);
+			}//END OF FORLOOP
+			
+			
+			//	2/3
+			output = output.replace(pattJunit02, functionNames[0] + "()");
+			
+			for(var i=0; i<arr_field.length; i++) {
+				if(arr_null[i] == MYSQL_LATEX_NOT_NULL) {
+					setCRUDBeans +=
+						"\t\tbean.set" + functionNames[i] + "(\"0\");\n";
+				}
+			}//END OF FORLOOP
+			
+			//	3/3
+			output = output.replace(pattJunit03, setCRUDBeans);
+			
+		} else {
+		//////////////////////////////////
+		/////////////////////////EXCEPTION
+		//////////////////////////////////
+			alert(ERR_INVALID_DB_TYPE);
+			return;
+		}
+		
+		$("#outputbox_for_junit").val(output);
+
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////IF INPUT PATTERN LIKE LETTERS("LETTERS")
+//////////////////////////////////////////////////////////MAKE IT LETTERS
+/////////////////////////////////////////////////////////////////////////
+/*
+		if(arr[0].indexOf("(") != -1){//UPDATR_ID("UPDATR_ID"),
+			output = "";
+			for(var i=0; i<arr.length; i++){
+				var str = arr[i];
+				str = str.replace(/[,]/g, "");
+				str = str.replace(/[\n]/g, "");
+				output = output + str.substring(0, str.indexOf("(")) + "\n";
+			}
+			$("#inputbox").val(output);
+		}//END OF IF
+		
+		inputs = $("#inputbox").val();
+		arr = inputs.match(patt);
+*/
+/////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////IF INPUT CONTAINS LOWERCASE
+/////////////////////////////////////////////////////CONVERT TO UPPERCASE
+/////////////////////////////////////////////////////////////////////////
+		if(	arr[0].substring(0, 1).charCodeAt() >= 97	&&			//ex : table_column
+				arr[0].substring(0, 1).charCodeAt() <= 122		){	//check only first char
+					
+			output = "";
+			
+			for(var i=0; i<arr.length; i++){
+				var str = arr[i];
+				str = str.replace(/[,]/g, "");
+				str = str.replace(/[\n]/g, "");
+				output = output + str.toUpperCase() + "\n";
+			}//END OF FORLOOP
+			
+			arr = output.match(patt);			
+		}//END OF IF
+
+///////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////BEAN, FIELD, SQL CONTENTS
+///////////////////////////////////////////////////////////////////////
+
+		//////////////////////////////////
+		//////////COMMON COMMENT VARIABLES
+		//////////////////////////////////
+		var comment_class_start1 =
+			"/**\n * ";
+		var comment_class_start2 = 
+			" FOR CRUD OF " + table_logical_name + "(" + table_physical_name + ") TABLE\n" + 
+			" * @version  $Revision$<br>\n" +
+			" *           $Date$\n" +
+			" * @author   $Author$\n" +
+			" * @since    ST3.0\n" +
+			" * \n";
+		var comment_class_start3 = " *\n */\n";
+		
+		//////////////////////////////////
+		///////////BEAN CONTENTS PREPARING
+		//////////////////////////////////
+		var beanOutput = "";
+		
+		var beanOutput_start = "";
+		
+		if(dataType == ORACLE) {
+		//////////////////////////////////
+		////////////////////////////ORACLE
+		//////////////////////////////////
+			beanOutput_start +=	comment_class_start1 + "BEAN" + comment_class_start2 + comment_class_start3 +
+													"public class " + table_logical_name + "Bean extends CommonBean {\n\n" +
+													"\tprivate static final long serialVersionUID = 1L;\n\n" +
+													"\t//DEFAULT COLUMNS\n\n";
+		} else if(dataType == MYSQL) {
+		//////////////////////////////////
+		////////////////////////////ORACLE
+		//////////////////////////////////			
+			beanOutput_start += comment_class_start1 + "BEAN" + comment_class_start2;
+														
+			var beanComment = "";
+			beanComment += " * @primarykey ";	
+			
+			for(var i=0; i<arr_field.length; i++) {
+				if(arr_key[i] == MYSQL_LATEX_PRIMARY) {
+					beanComment = beanComment + arr_field[i] + ", ";
+				}
+			}//END OF FORLOOP
+			
+			beanComment = beanComment.substring(0, beanComment.length-2);
+			beanComment = beanComment + "\n";
+				beanComment = beanComment + " * @notnull    ";
+			for(var i=0; i<arr_field.length; i++) {
+				if(arr_null[i] == MYSQL_LATEX_NOT_NULL) {
+					if(arr_default[i] != "")
+						beanComment = beanComment + arr_field[i] + "(\"" + arr_default[i] + "\")" + ", ";
+					else
+						beanComment = beanComment + arr_field[i] + ", ";
+				}
+			}//END OF FORLOOP
+			beanComment = beanComment.substring(0, beanComment.length-2);
+			beanComment = beanComment + "\n";
+			//debugprint(beanComment);
+			
+			beanOutput_start +=	beanComment + comment_class_start3 +
+													"public class " + table_logical_name + "Bean extends CommonBean {\n\n" +
+													"\tprivate static final long serialVersionUID = 1L;\n\n" +
+													"\t//DEFAULT COLUMNS\n\n";
+		} else {
+		//////////////////////////////////
+		/////////////////////////EXCEPTION
+		//////////////////////////////////
+			alert(ERR_INVALID_DB_TYPE);
+			return;
+		}
+		
+		beanOutput = beanOutput + beanOutput_start;
+		var beanOutput_end = "\t//JOIN COLUMNS\n\n}//END OF CLASS";
+		
+		var comment_start = "\t/**\n\t * @column " + table_physical_name + ".";
+		var comment_get_1 = "\n\t * @return ";
+		var comment_set_1 = "\n\t * @param  ";
+		var comment_end   = "\n\t */";
+		
+		var get_1 = "\tpublic String get";
+		var get_2 = "() {\n\t\treturn lData.getString(\"";
+		var get_3 = "\");\n\t}";
+		
+		var set_1 = "\tpublic void set";
+		var set_2 = "(String ";
+		var set_3 = ") {\n\t\tlData.setString(\"";
+		var set_4 = "\", ";
+		var set_5 = ");\n\t}";
+
+		//////////////////////////////////
+		//////////FIELD CONTENTS PREPARING
+		//////////////////////////////////
+		var fieldPartOutput = "";
+		var fieldOutput = "";
+		var fieldOutput_start1 =
+						comment_class_start1 + "FIELD" + comment_class_start2 + comment_class_start3 + 
+						"public class "+ table_logical_name +"FieldHandler implements FieldHandlerInterface {\n\n" +
+						"\tprivate BaseFieldInterface field;\n\n" +
+						"\tprivate final String tableAliasName = \"" + table_logical_name + "\";\n\n";
+		if(dataType == ORACLE) {
+			fieldOutput_start1 = fieldOutput_start1 + 
+						"\t@FieldClassName(name = \"smartafc.core.bizframe.field.closed." + package_name + "." + table_logical_name +"FieldHandler\")\n";
+		} else if(dataType == MYSQL) {
+			fieldOutput_start1 = fieldOutput_start1 + 
+						"\t@FieldClassName(name = \"smartafc.core.bizframe.field." + package_name + "." + table_logical_name +"FieldHandler\")\n";
+		} else {
+			alert(ERR_INVALID_DB_TYPE);
+			return;
+		}
+		fieldOutput_start1 = fieldOutput_start1 + 
+						"\tpublic enum " + table_logical_name + "Field implements BaseFieldInterface {\n" +
+						"\t\t//DEFAULT COLUMNS\n";
+
+		fieldOutput = fieldOutput + fieldOutput_start1;
+		fieldOutput = fieldOutput + "\t\tTABLE(\"" + table_physical_name + "\", \"" + table_logical_name + "\")";
+
+		//////////////////////////////////
+		////////////SQL CONTENTS PREPARING
+		//////////////////////////////////
+		var sqlCreateOutput = "";
+		var sqlUpdateIdOutput = "";
+		var sqlUpdateAppendOutput = "";
+
+		var sql_0 = "${";
+		var sql_1 = "{#";
+		var sql_2 = "}";
+		
+		var sql_3 = "<append condition=\"${";
+		var sql_4 = "}.NOTEMPTY\" id=\"#";
+		var sql_5 = "\">\n\t, ";
+		var sql_52 = "\">\n\t\t\t, ";
+		var sql_6 = " = ${";
+		var sql_7 = "}\t\t</append>";
+
+		var sqlSelectInput1 = "";
+		var sqlInsertInput1 = "";
+		var sqlInsertInput2 = "";
+		var sqlUpdateInput1 = "";
+		var sqlUpdateInput2 = "";
+
+		var updateDeleteCondition = "";
+		
+		//////////////////////////////////
+		///////////MIDDLE OUTPUT VARIABLES
+		//////////////////////////////////
+		var camelCol = "";
+		var functionName = "";
+
+		var linepatt = /([A-Za-z0-9]+_)/g;
+		var linepatt2 = /(_[A-Za-z0-9]+)/g;
+		
+		//MYSQL VARIABLE
+		var mysqlFirstPkFlag = true;
+		
+		///////////////////
+		//START OF FOR LOOP
+		///////////////////
+		for(var i=0; i<arr.length; i++){
+			
+			camelCol = "";
+			functionName = "";
+			
+			var tableCol = arr[i];
+			tableCol = tableCol.replace(/[,]/g, "");	//REMOVE [,]
+			tableCol = tableCol.replace(/[\n]/g, "");	//REMOVE [\n]
+			
+			/////////////////////////////////////////
+			//CAMEL CASE, FUNCTION NAME CONVERT START
+			/////////////////////////////////////////
+			if(tableCol.search("_") == -1){	// example case : ABNORMALCASE : just convert lowerCase
+				camelCol = tableCol.toLowerCase();
+			}else{													// example case : NORMAL_CASE
+				var linearr = tableCol.match(linepatt);
+				for(var j=0; j<linearr.length; j++){
+					linearr[j] = linearr[j].toLowerCase();
+					if(j==0){
+						camelCol += linearr[j].substring(0, linearr[j].length-1);
+					}else{
+						camelCol +=	linearr[j].substring(0, 1).toUpperCase() +
+												linearr[j].substring(1, linearr[j].length-1);
+					}
+				}
+				
+				linearr = tableCol.match(linepatt2);
+				var last = linearr[linearr.length-1].toLowerCase();
+				camelCol +=	last.substring(1, 2).toUpperCase() +
+										last.substring(2, last.length);
+			}
+			//END OF CONVERT
+
+			//set[FunctionName]()
+			functionName =	camelCol.substring(0, 1).toUpperCase() +
+											camelCol.substring(1, camelCol.length);
+
+			//FIELD PART/CONTENTS MAKING
+			fieldOutput			= fieldOutput			+ ",\n\t\t" + tableCol + "(\"" + tableCol + "\", \"tag." + camelCol + "\")";
+			fieldPartOutput	= fieldPartOutput	+  						tableCol + "(\"" + tableCol + "\", \"tag." + camelCol + "\")\n";
+			
+			//BEAN PART MAKING
+			beanOutput =	beanOutput + comment_start + tableCol + comment_get_1 + camelCol + comment_end + "\n";
+			beanOutput =	beanOutput + get_1 + functionName + get_2 + camelCol + get_3 + "\n\n";
+			
+			beanOutput =	beanOutput + comment_start + tableCol + comment_set_1 + camelCol + comment_end + "\n";
+			beanOutput =	beanOutput + set_1 + functionName + set_2 + camelCol + set_3 +
+										camelCol + set_4 + camelCol + set_5 + "\n\n";
+								
+			//SQL PART MAKING : INSERT SQL
+			sqlCreateOutput =	sqlCreateOutput +
+												sql_0 + camelCol + sql_2 + "," + "\n";
+			
+			//SQL PART MAKING : UPDATE ID
+			sqlUpdateIdOutput =	sqlUpdateIdOutput +
+													sql_1 + camelCol + sql_2 + "\n";
+			
+			//SQL PART MAKING : UPDATE APPEND
+			sqlUpdateAppendOutput =	sqlUpdateAppendOutput +
+															sql_3 + camelCol + sql_4 + camelCol + sql_5 +
+															tableCol + sql_6 + camelCol + sql_7 + "\n";
+
+			//SQL CONTENTS MAKING : SELECT
+			if(i==0)	sqlSelectInput1 = sqlSelectInput1 + "\t\t\t\t  A." + tableCol + "\n";
+			else			sqlSelectInput1 = sqlSelectInput1 + "\t\t\t\t, A." + tableCol + "\n";
+
+			//SQL CONTENTS MAKING : INSERT1
+			if(i==0)	sqlInsertInput1 = sqlInsertInput1 + "\t\t\t  " + tableCol + "\n";
+			else			sqlInsertInput1 = sqlInsertInput1 + "\t\t\t, " + tableCol + "\n";
+	
+			//SQL CONTENTS MAKING : INSERT2
+			if(i==0)	sqlInsertInput2 = sqlInsertInput2 + "\t\t\t " + sql_0 + camelCol + sql_2 + "\n";
+			else			sqlInsertInput2 = sqlInsertInput2 + "\t\t\t," + sql_0 + camelCol + sql_2 + "\n";
+
+			if(dataType == ORACLE) {
+			//////////////////////////////////
+			////////////////////////////ORACLE
+			//////////////////////////////////
+				////////////////////////////////////////////////////////////////////
+				///////////////////////////////////////SQL CONTENTS MAKING : UPDATE1
+				////////////////////////////////////////////////////////////////////
+				if(i==0) {
+					sqlUpdateInput1 +=	"\t\t\t PRIMARYKEY1 = ${PRIMARYKEY1}\n" +
+															"\t\t\t,PRIMARYKEY2 = ${PRIMARYKEY2}\n";
+					updateDeleteCondition +=	"\t\t\tPRIMARYKEY1 = ${PRIMARYKEY1}\tAND\n" +
+																		"\t\t\tPRIMARYKEY2 = ${PRIMARYKEY2}\n";
+				}
+				sqlUpdateInput1 += "\t\t\t" + sql_1 + camelCol + sql_2 + "\n";
+				
+				////////////////////////////////////////////////////////////////////
+				///////////////////////////////////////SQL CONTENTS MAKING : UPDATE2
+				////////////////////////////////////////////////////////////////////
+				sqlUpdateInput2 =	sqlUpdateInput2 + "\t\t" + sql_3 + camelCol + sql_4 + camelCol + sql_52 + tableCol + sql_6 + camelCol + sql_7 + "\n";
+				
+			} else if(dataType == MYSQL) {
+			//////////////////////////////////
+			/////////////////////////////MYSQL
+			//////////////////////////////////
+				////////////////////////////////////////////////////////////////////
+				///////////////////////////////////////SQL CONTENTS MAKING : UPDATE1
+				////////////////////////////////////////////////////////////////////
+				if(arr[i].search(arr_field[i]) == -1) {
+					alert(ERR_MYSQL_COLUMNS_PARSING);
+					return;
+				}
+
+				//PRIMARY KEY				
+				if(arr_key[i] == MYSQL_LATEX_PRIMARY) {
+					if(mysqlFirstPkFlag) {
+						mysqlFirstPkFlag = false;
+						sqlUpdateInput1 += "\t\t\t  " + tableCol + " = " + sql_0 + camelCol + sql_2 + "\n";
+						updateDeleteCondition +=	"\t\t\t" + tableCol + " = " + sql_0 + camelCol + sql_2 + "\n";
+					} else {
+						sqlUpdateInput1 += "\t\t\t, " + tableCol + " = " + sql_0 + camelCol + sql_2 + "\n";
+						updateDeleteCondition +=	"\t\t\tAND " + tableCol + " = " + sql_0 + camelCol + sql_2 + "\n";
+					}
+					
+				} else {
+					sqlUpdateInput1 = sqlUpdateInput1 + "\t\t\t" + sql_1 + camelCol + sql_2 + "\n";
+				}
+				
+				////////////////////////////////////////////////////////////////////
+				///////////////////////////////////////SQL CONTENTS MAKING : UPDATE2
+				////////////////////////////////////////////////////////////////////
+				if(arr[i].search(arr_field[i]) == -1) {
+					alert(ERR_MYSQL_COLUMNS_PARSING);
+					return;
+				}
+				
+				if(arr_key[i] != MYSQL_LATEX_PRIMARY) {
+					sqlUpdateInput2 =	sqlUpdateInput2 + "\t\t" + sql_3 + camelCol + sql_4 + camelCol + sql_52 + tableCol + sql_6 + camelCol + sql_7 + "\n";
+				}
+				
+			} else {
+			//////////////////////////////////
+			/////////////////////////EXCEPTION
+			//////////////////////////////////
+				alert(ERR_INVALID_DB_TYPE);
+				return;
+			}
+			
+		}//END OF FORLOOP
+
+		//////////////////////////////////
+		//////////////////BEAN PART ENDING
+		//////////////////////////////////
+		beanOutput = beanOutput + beanOutput_end;
+		$("#outputbox_for_bean").val(beanOutput);
+
+		//////////////////////////////////
+		/////////////////FIELD PART ENDING
+		//////////////////////////////////
+		$("#outputbox_for_field_part").val(fieldPartOutput);
+	
+		//////////////////////////////////
+		///////////////////SQL PART ENDING
+		//////////////////////////////////
+		$("#outputbox_for_sql_part_create").val(sqlCreateOutput);
+		$("#outputbox_for_sql_part_updateId").val(sqlUpdateIdOutput);
+		$("#outputbox_for_sql_part_updateAppend").val(sqlUpdateAppendOutput);
+		
+		//////////////////////////////////
+		/////////////FIELD CONTENTS ENDING
+		//////////////////////////////////
+		fieldOutput = fieldOutput + "\n\t\t//JOIN COLUMNS\n\t\t;\n\n";
+		
+		output = "";
+		output = $("#inputbox_for_field").val().replace(pattLogicalName, table_logical_name);
+
+		fieldOutput = fieldOutput + output;
+		$("#outputbox_for_field").val(fieldOutput);
+
+		//////////////////////////////////
+		///////////////SQL CONTENTS ENDING
+		//////////////////////////////////
+		var pattSelectInput1 = /XSELECT_INPUT1X/g;
+		var pattInsertInput1 = /XINSERT_INPUT1X/g;
+		var pattInsertInput2 = /XINSERT_INPUT2X/g;
+		var pattUpdateInput1 = /XUPDATE_INPUT1X/g;
+		var pattUpdateInput2 = /XUPDATE_INPUT2X/g;
+		var pattSelectQueryName = /XSELECT_QUERY_NAMEX/g;
+		var pattInsertQueryName = /XINSERT_QUERY_NAMEX/g;
+		var pattUpdateQueryName = /XUPDATE_QUERY_NAMEX/g;
+		var pattDeleteQueryName = /XDELETE_QUERY_NAMEX/g;
+		var pattSelectComment = /XSELECT_COMMENTX/g;
+		var pattInsertComment = /XINSERT_COMMENTX/g;
+		var pattUpdateComment = /XUPDATE_COMMENTX/g;
+		var pattDeleteComment = /XDELETE_COMMENTX/g;
+		var pattUpdateDeleteCondition = /XUPDATE_DELETE_CONDITIONX/g;
+		
+		// if modify blow strings, also modify inputbox_for_dao too.
+		var selectQueryName = "inquiryXLOGICALXList";
+		var insertQueryName = "createXLOGICALXInfo";
+		var updateQueryName = "updateXLOGICALXInfo";
+		var deleteQueryName = "deleteXLOGICALXInfo";
+		
+		var commonComment_start;
+		if( dataType == ORACLE) {
+		//////////////////////////////////
+		////////////////////////////ORACLE
+		//////////////////////////////////
+			commonComment_start = "/* smartafc.core.bizframe.closed.XPACKAGEX.XLOGICALX.";
+		} else if( dataType == MYSQL) {
+		//////////////////////////////////
+		/////////////////////////////MYSQL
+		//////////////////////////////////
+			commonComment_start = "/* smartafc.core.bizframe.XPACKAGEX.XLOGICALX.";
+		} else {
+		//////////////////////////////////
+		/////////////////////////EXCEPTION
+		//////////////////////////////////
+			alert(ERR_INVALID_DB_TYPE);
+			return;
+		}
+		
+		var commonComment_end = " */";
+			  	
+		output = "";
+		//INJECT "COLUMNS" TO SELECT "HERE"
+		output = $("#inputbox_for_sql").val().replace(pattSelectInput1, sqlSelectInput1);
+		//INJECT "COULMNS" TO INSERT INTO TABLE ( "HERE" )
+		output = output.replace(pattInsertInput1, sqlInsertInput1);
+		//INJECT "${COLUMNS} TO VALUES ( "HERE" )
+		output = output.replace(pattInsertInput2, sqlInsertInput2);
+		//INJECT "{#COLUMNS}" TO UPDATE TABLE SET "HERE"
+		output = output.replace(pattUpdateInput1, sqlUpdateInput1);
+		//INJECT COLUMNS THERE "<append condition..."
+		output = output.replace(pattUpdateInput2, sqlUpdateInput2);
+		//INJUECT "PRIMARY COLUMNS" TO "UPDATE/DELETE CONDITION"
+		output = output.replace(pattUpdateDeleteCondition, updateDeleteCondition);
+		//INJECT QUERY COMMENT
+		output = output.replace(pattSelectComment, commonComment_start + selectQueryName + commonComment_end);
+		output = output.replace(pattInsertComment, commonComment_start + insertQueryName + commonComment_end);
+		output = output.replace(pattUpdateComment, commonComment_start + updateQueryName + commonComment_end);
+		output = output.replace(pattDeleteComment, commonComment_start + deleteQueryName + commonComment_end);
+		//INJECT QUERY NAME
+		output = output.replace(pattSelectQueryName, selectQueryName);
+		output = output.replace(pattInsertQueryName, insertQueryName);
+		output = output.replace(pattUpdateQueryName, updateQueryName);
+		output = output.replace(pattDeleteQueryName, deleteQueryName);
+		//INJECT PHYSICAL/LOGICAL/PACKAGE NAME
+		output = output.replace(pattPhysicalName, table_physical_name);
+		output = output.replace(pattLogicalName, table_logical_name);
+		output = output.replace(pattPackageName, package_name);
+
+		$("#outputbox_for_sql").val(output);
+
+	});//END OF CLICK
+	
+  $("#clr").click(function(){
+		$(".output").val("");
+	});//END OF CLICK
+
+	$("#convert").click(function(){
+		var query = 
+		    "-- INPUT DATA CONVERTOR (ORACLE -> MYSQL)\n" 
+			+ "-- 1. INPUT YOUR TABLE_NAME TO \'TABLE NAME\n"
+			+ "-- 2. AFTER GENERATING INPUT DATA, TYPE DEFAULT VALUE.\n"
+			+ "WITH TABLENAME AS(SELECT 'TABLE_NAME' AS \"TARGET TABLE name\" FROM DUAL)\n"
+			+ "SELECT COLUMN_NAME           || \' & \' ||\n"
+			+ "       DATA_TYPE             || \' & \' ||\n"
+			+ "       DECODE(NULLABLE, \'N\', \'NO\', \'Y\', \'YES\')         || \' & \' ||\n"
+			+ "       MARK                  || \' & \' ||\n"
+			+ "       \' \'                   || \' & \' ||\n"
+			+ "       \' \'                   || \'\\\\' AS INPUT_DATA\n"
+			+ "FROM ALL_TAB_COLUMNS ATC\n"
+			+ "LEFT JOIN \n"
+			+ "     (\n"
+			+ "    SELECT COLUMN_NAME AS PRIMARY_COLUMN_NAME,\n"
+			+ "           \'PRI\' AS MARK\n"
+			+ "    FROM ALL_CONS_COLUMNS ACC\n"
+			+ "    WHERE ACC.TABLE_NAME = (SELECT * FROM TABLENAME) AND\n"
+			+ "          ACC.CONSTRAINT_NAME = \n"
+			+ "                          (SELECT AC.CONSTRAINT_NAME\n"
+			+ "                          FROM ALL_CONSTRAINTS AC\n"
+			+ "                          WHERE AC.TABLE_NAME = (SELECT * FROM TABLENAME)   AND\n"
+			+ "                                AC.CONSTRAINT_TYPE = \'P\')\n"
+			+ "     ) PK ON ATC.COLUMN_NAME = PK.PRIMARY_COLUMN_NAME\n"
+			+ "WHERE ATC.TABLE_NAME = (SELECT * FROM TABLENAME);";
+		alert(query);
+	});//END OF CLICK
+
+});
+
+function enter(Object){
+	//if(window.event.keyCode == 13)
+	//	$("#btn").click();
+	//onmouseenter="enter(this)"
+   var copyText = Object.value;
+   alert(copyOption);
+}
+
+function leave(){
+	$("#btn").click();
+}
+</script>
+</head>
+
+<body>
+	
+<div style="position:fixed; float:left;background-color:white;">
+	<select id="slct">
+		<option id="slctOpt_oracle" value="oracle">ORACLE</option>
+		<option id="slctOpt_mysql" value="mysql">MYSQL</option>
+		<option id="slctOpt_variety" value="variety">VARIETY</option>
+	</select>
+	<button id="btn" name="btn" style="border:1px solid #ddd;background:white;">SAVE YOUR TIME</button>
+	<button id="clr" name="btn" style="border:1px solid #ddd;background:white;">CLEAR</button>
+	TABLE PHYSICAL NAME : <input	id="table_physical_name"	type="text" style="border:1px solid #ddd;background:white;"/>
+	TABLE LOGICAL  NAME : <input	id="table_logical_name"		type="text" style="border:1px solid #ddd;background:white;" />
+	PACKAGE NAME : <input  			id="package_name"					type="text" style="border:1px solid #ddd;background:white;" />
+	<br><img src="https://cdn4.iconfinder.com/data/icons/dortmund/Dortmund-32x32/full-time.png" style="height:9px;">
+	<b>usage</b>(oracle:pl/sql)  : open new SQL Window, type (TABLE NAME), right click, Describe, click Name, copy & paste to first textarea.
+		<img id="convert" src="https://cdn4.iconfinder.com/data/icons/dortmund/Dortmund-32x32/sign-out.png" style="height:9px;">
+	<br><img src="https://cdn4.iconfinder.com/data/icons/dortmund/Dortmund-32x32/full-time.png" style="height:9px;">
+	<b>usage</b>(mysql :heidiSQL): in the SQL Window, type DESC (TABLE_NAME), execute(F9), right click result View, 격자행 내보내기, 출력형식:LaText, 확인, paste to first textarea.
+	<br><img src="https://cdn4.iconfinder.com/data/icons/dortmund/Dortmund-32x32/email.png" style="height:9px;">
+	<b>feedback</b> : herdin86@gmail.com
+</div><br><br><br><br><br>
+
+<!---------------------------------------------------------->
+<!--TABLE--------------------------------------------------->
+<!---------------------------------------------------------->
+<table>
+
+<!--TR------------------------------------------------------>
+	<tr>
+		<td>input : DB COLUMNS<br>ex:db_column<br>DB_COLUMN<br>DBCOL("DBCOL")</td>
+		<td>output : field part<br>need : input</td>
+		<td>output : sql create part<br>need : input</td>
+		<td>output : sql update part<br>need : input</td>
+	</tr>
+<!--TR------------------------------------------------------>
+	<tr>
+		<td>
+					<textarea id="inputbox" rows="15" cols="25">
+TABLE_COLUMN
+AAB_ABA
+BBC_BCB
+CCD
+DDE_DED</textarea>
+		</td>
+		<td>	<textarea id="outputbox_for_field_part"				class="output" rows="15" cols="25"></textarea>	</td>
+		<td>	<textarea id="outputbox_for_sql_part_create"				class="output" rows="15" cols="25"></textarea>	</td>
+		<td>	<textarea id="outputbox_for_sql_part_updateId"			class="output" rows="15" cols="25"></textarea>	</td>
+	</tr>	
+
+<!--TR------------------------------------------------------>
+	<tr>
+		<td colspan="4">output : <b>BEAN content</b><br>need : input, table names</td>
+	</tr>
+<!--TR------------------------------------------------------>
+	<tr>
+		<td colspan="4">
+					<textarea id="outputbox_for_bean"					class="output" rows="15" cols="113"></textarea>
+		</td>
+	</tr>
+
+<!--TR------------------------------------------------------>
+	<tr>
+		<td colspan="4">output : <b>DAO content</b><br>need : table names, package name</td>
+	</tr>
+<!--TR------------------------------------------------------>
+	<tr>
+		<td colspan="4">
+					<textarea id="outputbox_for_dao"					class="output" rows="15" cols="113"></textarea>
+		</td>
+	</tr>
+
+<!--TR------------------------------------------------------>
+	<tr>
+		<td colspan="4">output : <b>FIELD content</b><br>need : input, table names, package name</td>
+	</tr>
+<!--TR------------------------------------------------------>
+	<tr>
+		<td colspan="4">
+					<textarea id="outputbox_for_field"					class="output" rows="15" cols="113"></textarea>
+		</td>
+	</tr>
+
+<!--TR------------------------------------------------------>
+	<tr>
+		<td colspan="4">output : <b>SQL content</b><br>need : input, table names, package name</td>
+	</tr>
+<!--TR------------------------------------------------------>
+	<tr>
+		<td colspan="4">
+					<textarea id="outputbox_for_sql"					class="output" rows="15" cols="113"></textarea>
+		</td>
+	</tr>
+
+<!--TR------------------------------------------------------>
+	<tr>
+		<td colspan="4">output : <b>Junit content</b><br>need : table names</td>
+	</tr>
+<!--TR------------------------------------------------------>
+	<tr>
+		<td colspan="4">
+					<textarea id="outputbox_for_junit"				class="output" rows="15" cols="113"></textarea>
+		</td>
+	</tr>
+
+</table>
+
+
+<br>
+
+<!--
+<tr>
+	<td colspan="4">output : sql update append part<br>need : input</td>
+</tr>
+
+
+	<tr>
+		<td colspan="4">
+					<textarea id="outputbox_for_sql_part_updateAppend"	style="visibility:hidden;" class="output" rows="15" cols="113"></textarea>
+		</td>
+	</tr>
+-->
+<!-------------------------------------------------------------------------------------------->
+<!-------------------------------input sources need to hide----------------------------------->
+<!-------------------------------------------------------------------------------------------->
+<textarea id="inputbox_for_dao"	          style="visibility:hidden;" readonly="true"rows="1" cols="113">
+/**
+ * DAO FOR CRUD TO XLOGICALX(XPHYSICALX) TABLE
+ * 
+ * @see     XLOGICALXBean
+ * @version $Revision$ <br>  
+ *          $Date$
+ * @author  $Author$  
+ * @since   ST3.0  
+ */
+public class XLOGICALXDAO extends BaseDAO<XLOGICALXBean, BaseMultiBean<XLOGICALXBean>> {
+	
+	
+	public XLOGICALXDAO(String dbSpec){
+		super(dbSpec);
+	}
+	
+	public XLOGICALXDAO(){};
+
+	/**
+	 * SELECT SINGLE DATA FROM XLOGICALX(XPHYSICALX) TABLE
+	 * 
+	 * @return    XLOGICALXBean
+	 * @exception BizFrameException
+	 */
+    @Override
+    public XLOGICALXBean inquirySingle() throws BizFrameException {
+        XLOGICALXBean bean = null;
+        try {
+            bean = new XLOGICALXBean();
+            LData param = new LData();
+            param.setString("compareCondition", compareCondition.toString());
+            param.setString("likeCondition", likeCondition.toString());
+            param.setString("betweenCondition", betweenCondition.toString());
+            param.setString("inCondition", inCondition.toString());
+            param.setString("orderCondition", orderCondition.toString());
+            LCommonDao commonDao = new LCommonDao("/smartafc/core/bizframe/closed/XPACKAGEX/XLOGICALX/inquiryXLOGICALXList", param, dbSpec);
+            bean.setLData(commonDao.executeQueryForSingle());
+        } catch (DevonException de) {
+            throw ExceptionUtil.getException(de, dbSpec);
+        }
+
+        return bean;
+    }
+
+	/**
+	 * SELECT MULTI DATA FROM XLOGICALX(XPHYSICALX) TABLE
+	 * 
+	 * @return    BaseMultiBean<XLOGICALXBean>
+	 * @exception BizFrameException
+	 */
+    @Override
+    public BaseMultiBean<XLOGICALXBean> inquiryList() throws BizFrameException {
+        BaseMultiBean<XLOGICALXBean> multiBean = null;
+        try {
+            multiBean = new BaseMultiBean<XLOGICALXBean>();
+            LData param = new LData();
+            param.setString("compareCondition", compareCondition.toString());
+            param.setString("likeCondition", likeCondition.toString());
+            param.setString("betweenCondition", betweenCondition.toString());
+            param.setString("inCondition", inCondition.toString());
+            param.setString("orderCondition", orderCondition.toString());
+            LCommonDao commonDao = new LCommonDao("/smartafc/core/bizframe/closed/XPACKAGEX/XLOGICALX/inquiryXLOGICALXList", param, dbSpec);
+            LMultiData lmData = commonDao.executeQuery();
+            
+            multiBean.setLmDataOnly(lmData);
+            XLOGICALXBean bean = null;
+            for (int idx = 0; idx < lmData.getDataCount(); idx++) {
+            	bean = new XLOGICALXBean();
+            	bean.setLData(lmData.getLData(idx));
+                multiBean.add(bean);
+            }
+        } catch (DevonException de) {
+            throw ExceptionUtil.getException(de, dbSpec);
+        }
+        return multiBean;
+    }
+
+    /**
+     * SELECT MULTI DATA FOR PAGE FROM XLOGICALX(XPHYSICALX) TABLE
+     * 
+     * @param     LData pagingData
+     * @return    BaseMultiBean<XLOGICALXBean>
+     * @exception BizFrameException
+     */
+    @Override
+    public BaseMultiBean<XLOGICALXBean> inquiryListForPage(LData pagingData) throws BizFrameException {
+        BaseMultiBean<XLOGICALXBean> multiBean = null;
+        try {
+            multiBean = new BaseMultiBean<XLOGICALXBean>();
+            LData param = new LData();
+            param.setString("compareCondition", compareCondition.toString());
+            param.setString("likeCondition", likeCondition.toString());
+            param.setString("betweenCondition", betweenCondition.toString());
+            param.setString("inCondition", inCondition.toString());
+            param.setString("orderCondition", orderCondition.toString());
+            param.setString("devonTargetRow", pagingData.getString("devonTargetRow"));
+
+            LCommonDao commonDao = new LCommonDao("/smartafc/core/bizframe/closed/XPACKAGEX/XLOGICALX/inquiryXLOGICALXList", param, dbSpec);
+            LMultiData lmData = commonDao.executeQueryForPage();
+
+            multiBean.setLmDataOnly(lmData);
+            XLOGICALXBean bean = null;
+            for (int idx = 0; idx < lmData.getDataCount(); idx++) {
+            	bean = new XLOGICALXBean();
+            	bean.setLData(lmData.getLData(idx));
+                multiBean.add(bean);
+            }
+        } catch (DevonException de) {
+            throw ExceptionUtil.getException(de, dbSpec);
+        }
+        return multiBean;
+    }
+
+    /**
+     * INSERT SINGLE DATA INTO XLOGICALX(XPHYSICALX) TABLE
+     * <pre>
+     *	[EXAMPLE]
+     * </pre>
+     * @param     XLOGICALXBean param
+     * @return    int
+     * @exception BizFrameException
+     */
+    @Override
+    public int create(XLOGICALXBean param) throws BizFrameException {
+        int result = -1;
+        try {
+            LCommonDao commonDao = new LCommonDao("/smartafc/core/bizframe/closed/XPACKAGEX/XLOGICALX/createXLOGICALXInfo", param.getLData(), dbSpec);
+            result = commonDao.executeUpdate();
+        } catch (DevonException de) {
+            throw ExceptionUtil.getException(de, dbSpec);
+        }
+        return result;
+    }
+
+    /**
+     * INSERT MULTI DATA INTO XLOGICALX(XPHYSICALX) TABLE
+     * 
+     * @param     BaseMultiBean<XLOGICALXBean> params
+     * @return    int[]
+     * @exception BizFrameException
+     */
+    @Override
+    public int[] create(BaseMultiBean<XLOGICALXBean> params) throws BizFrameException {
+        int[] results = null;
+        try {
+            LMultiDao multiDao = new LMultiDao("/smartafc/core/bizframe/closed/XPACKAGEX/XLOGICALX/createXLOGICALXInfo", dbSpec);
+            multiDao.add(params.getLmData());
+            results = multiDao.executeUpdate();
+        } catch (DevonException de) {
+            throw ExceptionUtil.getException(de, dbSpec);
+        }
+        return results;
+    }
+
+    /**
+     * UPDATE SINGLE DATA TO XLOGICALX(XPHYSICALX) TABLE
+     * <pre>
+     *	[EXAMPLE]
+     * </pre>
+     * @param     XLOGICALXBean param
+     * @return    int
+     * @exception BizFrameException
+     */
+    @Override
+    public int update(XLOGICALXBean param) throws BizFrameException {
+        int result = -1;
+        try {
+            LCommonDao commonDao = new LCommonDao("/smartafc/core/bizframe/closed/XPACKAGEX/XLOGICALX/updateXLOGICALXInfo", param.getLData(), dbSpec);
+            result = commonDao.executeUpdate();
+        } catch (DevonException de) {
+            throw ExceptionUtil.getException(de, dbSpec);
+        }
+        return result;
+    }
+
+    /**
+     * UPDATE MULTI DATA TO XLOGICALX(XPHYSICALX) TABLE
+     * 
+     * @param     BaseMultiBean<XLOGICALXBean> params
+     * @return    int[]
+     * @exception BizFrameException
+     */
+    @Override
+    public int[] update(BaseMultiBean<XLOGICALXBean> params) throws BizFrameException {
+        int[] results = null;
+        try {
+            LMultiDao multiDao = new LMultiDao("/smartafc/core/bizframe/closed/XPACKAGEX/XLOGICALX/updateXLOGICALXInfo", dbSpec);
+            multiDao.add(params.getLmData());
+            results = multiDao.executeUpdate();
+        } catch (DevonException de) {
+            throw ExceptionUtil.getException(de, dbSpec);
+        }
+        return results;
+    }
+
+    /**
+     * DELETE SINGLE DATA FROM XLOGICALX(XPHYSICALX) TABLE
+     * <pre>
+     *	[EXAMPLE]
+     * </pre>
+     * @param     XLOGICALXBean param
+     * @return    int
+     * @exception BizFrameException
+     */
+    @Override
+    public int delete(XLOGICALXBean param) throws BizFrameException {
+        int result = -1;
+        try {
+            LCommonDao commonDao = new LCommonDao("/smartafc/core/bizframe/closed/XPACKAGEX/XLOGICALX/deleteXLOGICALXInfo", param.getLData(), dbSpec);
+            result = commonDao.executeUpdate();
+        } catch (DevonException de) {
+            throw ExceptionUtil.getException(de, dbSpec);
+        }
+        return result;
+    }
+
+    /**
+     * DELETE MULTI DATA FROM XLOGICALX(XPHYSICALX) TABLE
+     * 
+     * @param     BaseMultiBean<XLOGICALXBean> params
+     * @return    int[]
+     * @exception BizFrameException
+     */
+    @Override
+    public int[] delete(BaseMultiBean<XLOGICALXBean> params) throws BizFrameException {
+        int[] results = null;
+        try {
+            LMultiDao multiDao = new LMultiDao("/smartafc/core/bizframe/closed/XPACKAGEX/XLOGICALX/deleteXLOGICALXInfo", dbSpec);
+            multiDao.add(params.getLmData());
+            results = multiDao.executeUpdate();
+        } catch (DevonException de) {
+            throw ExceptionUtil.getException(de, dbSpec);
+        }
+        return results;
+    }
+
+    /**
+     * SAVE MULTI DATA TO XLOGICALX(XPHYSICALX) TABLE
+     * 
+     * @param     BaseMultiBean<XLOGICALXBean> params
+     * @return    int[]
+     * @exception BizFrameException
+     */
+    @Override
+    public int[] save(BaseMultiBean<XLOGICALXBean> params) throws BizFrameException {
+        int[] results = null;
+        try {
+            LCompoundDao compoundDao = new LCompoundDao();
+            compoundDao.setInsertQuery("/smartafc/core/bizframe/closed/XPACKAGEX/XLOGICALX/createXLOGICALXInfo");
+            compoundDao.setUpdateQuery("/smartafc/core/bizframe/closed/XPACKAGEX/XLOGICALX/updateXLOGICALXInfo");
+            compoundDao.setDeleteQuery("/smartafc/core/bizframe/closed/XPACKAGEX/XLOGICALX/deleteXLOGICALXInfo");
+            compoundDao.addWithJobType(params.getLmData(), dbSpec);
+            results = compoundDao.executeUpdate();
+        } catch (DevonException de) {
+            throw ExceptionUtil.getException(de, dbSpec);
+        }
+        return results;
+    }
+
+}//END OF CLASS'
+</textarea>
+<textarea id="inputbox_for_field"	        style="visibility:hidden;" readonly="true"rows="1" cols="113">
+		private String value;
+		private String label;
+
+		private XLOGICALXField(String value, String label) {
+			this.value = value;
+			this.label = label;
+		}
+
+		@Override
+		public String value() {
+			return value;
+		}
+
+		@Override
+		public String getName() {
+			return StringUtil.convertToCamelCase(value);
+		}
+		
+		public String getLabel() {
+			return label;
+		}
+
+	}
+
+	public XLOGICALXFieldHandler(BaseFieldInterface field) {
+		this.field = field;
+	}
+
+	@Override
+	public String getValue() {
+		return field.value();
+	}
+
+	@Override
+	public String getTableAliasName() {
+		return this.tableAliasName;
+	}
+}//END OF CLASS
+</textarea>
+<textarea id="inputbox_for_sql"	          style="visibility:hidden;" readonly="true"rows="1" cols="113">
+<?xml version="1.0" encoding="UTF-8"?>
+
+<statements>
+	<statement name="XSELECT_QUERY_NAMEX">
+		<![CDATA[
+		SELECT	*
+		XSELECT_COMMENTX
+		FROM
+			(
+			SELECT
+XSELECT_INPUT1X
+			FROM XPHYSICALX A
+			) AA
+		WHERE 1 = 1
+		{#betweenCondition}
+		{#likeCondition}
+		{#compareCondition}
+		{#inCondition}
+		{#orderCondition}
+		]]>
+		<append condition="${betweenCondition}.NOTEMPTY" id="#betweenCondition">
+		  AND ${betweenCondition:unchecked}		</append>
+		<append condition="${likeCondition}.NOTEMPTY" id="#likeCondition">
+		  AND ${likeCondition:unchecked}		</append>
+		<append condition="${compareCondition}.NOTEMPTY" id="#compareCondition">
+		  AND ${compareCondition:unchecked}		</append>
+		<append condition="${inCondition}.NOTEMPTY" id="#inCondition">
+		  AND ${inCondition:unchecked}	</append>
+		<append condition="${orderCondition}.NOTEMPTY" id="#orderCondition">
+		  ORDER BY ${orderCondition:unchecked}	</append>
+	</statement>
+
+	<statement name="XINSERT_QUERY_NAMEX">
+		<![CDATA[
+		INSERT INTO XPHYSICALX
+		XINSERT_COMMENTX
+		(
+XINSERT_INPUT1X
+		)
+		VALUES
+		(
+XINSERT_INPUT2X
+		)
+		]]>
+	</statement>
+
+	<statement name="XUPDATE_QUERY_NAMEX">
+		<![CDATA[
+		UPDATE	XPHYSICALX
+		XUPDATE_COMMENTX
+		SET
+XUPDATE_INPUT1X
+		WHERE
+XUPDATE_DELETE_CONDITIONX
+		]]>
+XUPDATE_INPUT2X
+	</statement>
+
+	<statement name="XDELETE_QUERY_NAMEX">
+		<![CDATA[
+		DELETE FROM	XPHYSICALX
+		XDELETE_COMMENTX
+		WHERE
+XUPDATE_DELETE_CONDITIONX
+		]]>
+	</statement>
+</statements>
+</textarea>
+<textarea id="inputbox_for_junit"	        style="visibility:hidden;" readonly="true"rows="1" cols="113">
+/**
+ * 
+ * 
+ * @see
+ * 
+ * @version $Revision$ <br>
+ *          $Date$
+ * @author  $Author$
+ * @since   ST3.0
+ */
+public class XLOGICALXDAOTest extends CommonRunnerTest {
+
+	private static Logger LOGGER = LoggerFactory
+			.getLogger(XLOGICALXDAOTest.class);
+
+	@Before
+	public void setUp() {
+		super.setUp();
+	}
+
+	@Test
+	public void inquirySingle_TEST() throws BizFrameException {
+		XLOGICALXDAO dao = new XLOGICALXDAO(dbSpec);
+		dao.addCompareCondition(XLOGICALXField.XSET_CODEX, COMPARE.EQUAL, "SET_CODE");
+
+		XLOGICALXBean bean = dao.inquirySingle();
+
+		if( bean.getLData().isEmpty() ) {
+			assertEquals(0, 0);
+		} else {
+			assertEquals("SET_CODE", bean.getXGET_FUNCX);
+		}
+	}
+
+	@Test
+	public void inquiryList_TEST() throws BizFrameException {
+		XLOGICALXDAO dao = new XLOGICALXDAO(dbSpec);
+		dao.addLikeCondition(XLOGICALXField.XSET_CODEX, "SET_CODE", "", "%");
+
+		BaseMultiBean<XLOGICALXBean> beans = dao.inquiryList();
+
+		if( beans.isEmpty() ) {
+			assertThat(0, is(0));
+		} else {
+			assertThat(beans.getDataCount(), is(beans.getDataCount()));
+		}
+	}
+
+	@Test()
+	public void create_TEST() {
+		// Given
+		XLOGICALXDAO dao = new XLOGICALXDAO(dbSpec);
+		XLOGICALXBean bean = new XLOGICALXBean();
+XSET_CRUD_BEANSX
+
+		// When
+		@SuppressWarnings("unused")
+		EXCEPTION_TYPE type = null;
+		int result = -1;
+
+		try {
+			result = dao.create(bean);
+		} catch (BizFrameException e) {
+			type = ExceptionUtil.getType(e);
+		}
+
+		// Then
+		assertThat(result, is(result));
+	}
+
+	@Test
+	public void update_TEST() {
+		// Given
+		XLOGICALXDAO dao = new XLOGICALXDAO(dbSpec);
+		XLOGICALXBean bean = new XLOGICALXBean();
+XSET_CRUD_BEANSX
+
+		// When
+		int result = -1;
+
+		try {
+			result = dao.update(bean);
+		} catch (BizFrameException e) {
+			switch (ExceptionUtil.getType(e)) {
+			case UNKOWN_ERROR:
+				LOGGER.debug(e.getMessage());
+			}
+		}
+
+		// Then
+		assertThat(result, is(result));
+
+	}
+
+	@Test
+	public void delete_TEST() {
+		// Given
+		XLOGICALXDAO dao = new XLOGICALXDAO(dbSpec);
+		XLOGICALXBean bean = new XLOGICALXBean();
+XSET_CRUD_BEANSX
+		
+		//When
+		@SuppressWarnings("unused")
+		EXCEPTION_TYPE type = null;
+		int result = -1;
+		try {
+			result = dao.delete(bean);
+		} catch (BizFrameException e) {
+			type = ExceptionUtil.getType(e);
+		}
+		
+		//Then
+		assertThat(result, is(result));
+	}
+
+}//END OF CLASS
+</textarea>
+
+</body>
+</html>

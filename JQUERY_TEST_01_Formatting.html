@@ -1,0 +1,50 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js">
+</script>
+<script>
+$(document).ready(function() {
+	var today = new Date();
+	$("#input01").val(
+		today.getFullYear() + "/" +
+		(today.getMonth()+1) +  "/" +
+		today.getDate() + " " +
+		today.getHours() + ":" +
+		today.getMinutes() + ":" +
+		today.getSeconds()
+	);
+});
+	
+function formatting_dateHms(date){
+    if( date == null || date == "" ) return "";
+    alert(date + " -> " + date.replace(/(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})/, '$1-$2-$3 $4:$5:$6'));
+}
+function formatting_biz(bizNo){
+	if( bizNo.length < 10) return bizNo;
+	alert(bizNo + " -> " + bizNo.replace(/(\d{3})(\d{2})(\d{5})/g, "$1-$2-$3"));
+}
+function formatting_tel(telNo){
+	if ( telNo.length == 10 ){
+		alert(telNo + " -> " +  telNo.replace(/(\d{3})(\d{3})(\d{4})/g, "$1-$2-$3"));
+	}else if( telNo.length == 11 ){
+		alert(telNo + " -> " +  telNo.replace(/(\d{3})(\d{4})(\d{4})/g, "$1-$2-$3"));
+	}else
+	    alert("");
+}
+
+</script>
+</head>
+<body>
+	<div>
+	  <button id="btn01" name="btn01" onclick="formatting_dateHms('20131214124523')" style="border:1px solid #ddd;background:white;">formatting_dateHms()</button>
+	  <button id="btn02" name="btn02" onclick="formatting_biz('1234567890')" style="border:1px solid #ddd;background:white;">formatting_biz()</button>
+	  <button id="btn03" name="btn03" onclick="formatting_tel('01023230423')" style="border:1px solid #ddd;background:white;">formatting_tel()</button> 
+	  <button id="btn04" name="btn05" onclick="formatting_tel('0103230423')" style="border:1px solid #ddd;background:white;">formatting_tel()</button> 
+	</div>
+	
+	<div>
+		<input type="text" id="input01" name="input01"/>
+	</div>
+</body>
+</html>

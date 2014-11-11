@@ -1,0 +1,574 @@
+﻿<!DOCTYPE html>
+<html>
+<head><title>AFC BIZFRAMEWORK BEAN COMMENT/JUNIT PART/MESSAGE XML GENERATOR</title>
+<!-- SEARCH FOR MORE GOOGLE FONT! -->
+<link href='http://fonts.googleapis.com/css?family=Shadows+Into+Light' rel='stylesheet' type='text/css'>
+<link href='http://fonts.googleapis.com/css?family=Audiowide' rel='stylesheet' type='text/css'>
+<link href='http://fonts.googleapis.com/css?family=Bangers' rel='stylesheet' type='text/css'>
+<style type="text/css">
+	@import url(http://fonts.googleapis.com/earlyaccess/nanumgothic.css);
+	body, button, div, input, textarea, pre, select{
+		font-size : 12px;
+		font-family:	"8BITWONDERNominal",'Nanum Gothic';
+		font-backup:	'Audiowide',
+									'Shadows Into Light',
+									'Bangers',
+									cursive;
+									
+	}
+</style>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js">
+</script>
+<!--
+#oracle pl/sql
+region_id	varchar2(3)		
+adpt_dt	varchar2(8)		
+day_close_time	varchar2(6)		
+updat_resn	varchar2(100)	y	
+end_dt	varchar2(8)	y	
+registr_id	varchar2(20)		
+regist_date	varchar2(14)		
+updatr_id	varchar2(20)	y	
+updat_date	varchar2(14)	y	
+
+
+
+#mysql heidiSQL
+\begin{tabular}{ c  c  c  c  c  c }
+DEPOT_ID & varchar(3) & NO & PRI &  & \\ 
+DEVICE_ID & varchar(9) & NO & PRI &  & \\ 
+CARD_NUM & varchar(16) & NO & PRI &  & \\ 
+BEF_AUTOLOAD_DATE & varchar(14) & NO & PRI & N & \\ 
+REGION_ID & varchar(3) & YES &  &  & \\ 
+AGENCY_ID & varchar(3) & YES &  &  & \\ 
+TRFFMEAN_GROUP_CD & char(1) & YES &  &  & \\ 
+TRFFMEAN_CD & varchar(2) & YES &  &  & \\ 
+CARD_TRNSCTN_CLASS_CD & char(1) & YES &  &  & \\ 
+ISSUER_ID & varchar(7) & YES &  &  & \\ 
+PROFILE_CD & varchar(2) & YES &  &  & \\ 
+PROFILE_LANG_CD & varchar(3) & YES &  &  & \\ 
+KEY_SET_VER & varchar(3) & YES &  &  & \\ 
+ALGOR_ID & varchar(2) & YES &  &  & \\ 
+TRNSCTN_TYPE_CD & varchar(2) & YES &  &  & \\ 
+BOARDNG_DISEMBRK_CD & char(1) & YES &  &  & \\ 
+BEF_TRFFMEAN_CD & varchar(2) & YES &  &  & \\ 
+BEF_STATION_ID & varchar(4) & YES &  &  & \\ 
+BEF_DEVICE_ID & varchar(9) & YES &  &  & \\ 
+BEF_AUTOLOAD_SAM_ID & varchar(16) & YES &  &  & \\ 
+BEF_AUTOLOAD_SAM_TRNSCTN_NUM & varchar(10) & YES &  &  & \\ 
+BEF_AUTOLOAD_DT & varchar(8) & YES &  &  & \\ 
+BEF_CARD_TRNSCTN_SEQ & varchar(10) & YES &  &  & \\ 
+BEF_AUTOLOAD_AMT & decimal(12,2) & YES &  &  & \\ 
+BEF_AUTOLOAD_AFT_BAL & decimal(12,2) & YES &  &  & \\ 
+BEF_MON_ACCM_AUTOLOAD_AMT & decimal(12,2) & YES &  &  & \\ 
+BEF_MON_ACCM_AUTOLOAD_CNT & decimal(3,0) & YES &  &  & \\ 
+BEF_TOT_ACCM_AUTOLOAD_AMT & decimal(12,2) & YES &  &  & \\ 
+BEF_TOT_ACCM_AUTOLOAD_CNT & decimal(3,0) & YES &  &  & \\ 
+BEF_SAM_SIGN & varchar(10) & YES &  &  & \\ 
+RECORD_MAC & varchar(10) & YES &  &  & \\ 
+TRANSM_SEQ & varchar(10) & YES &  &  & \\ 
+LAST_TRANSM_SEQ & varchar(10) & YES &  &  & \\ 
+DELAY_DAYS & decimal(3,0) & YES &  &  & \\ 
+RCV_DATE & varchar(14) & YES &  &  & \\ 
+CENTR_SYSTM_TRANSM_YN & char(1) & YES &  &  & \\ 
+\end{tabular}
+
+-->
+<script>
+/////////////////
+//////////////////////////////////
+///////////////////GLOBAL VARIABLE
+//////////////////////////////////
+var DEBUG = true;
+console.log("DEBUG MODE : " + DEBUG);
+
+var MYSQL_LATEX_PRIMARY = "PRI";
+var MYSQL_LATEX_NOT_NULL = "NO";
+//////////////////////////////////
+///////////////////GLOBAL FUNCTION
+//////////////////////////////////
+function debugprint(debugStr) {
+	if(DEBUG) {
+		console.log(debugStr);
+	}
+}//END OF debugprint()
+
+//////////////////////////////////
+///////////DOCUMENT READY FUNCTION
+//////////////////////////////////
+$(document).ready(function(){
+  $("#input").click(function(){
+    $("#input").val("");
+  });
+
+////////////////////////
+// SAVE YOUR TIME BUTTON
+////////////////////////
+  $("#btn").click(function(){
+  	
+  	var debug = false;
+  	
+  	var ORACLE = $("#slctOpt_oracle").val();
+  	var MYSQL = $("#slctOpt_mysql").val();
+  	var VARIETY = $("#slctOpt_message").val();
+  	
+  	var ERR_INVALID_DB_TYPE = "Set your dataBaseType properly.";
+  	
+  	var dataType = $("#slct option:selected").val();
+  	console.log("selected option : " + dataType);
+		  	
+  	if(dataType == ORACLE) {
+  		oracleProcess();
+  	} else if(dataType == MYSQL) {
+  		mysqlProcess();
+  	} else if(dataType == VARIETY) {
+  		navvyProcess();
+  	} else {
+  		parsingTest();
+  		//alert(ERR_INVALID_DB_TYPE);
+  	}
+  });//END OF CLICK EVENT
+  
+  $("#clr").click(function(){
+		$(".output").val("");
+	});
+
+});//END OF DOCUMENT READY
+
+function oracleProcess() {
+	var inputs = $("#inputbox").val();
+	
+	var patt_except_db_type = /\t[\w(),]+\t/g;
+	inputs = inputs.replace(patt_except_db_type, "XXX");
+	
+	var patt_distinguish_dval = /[\t]/g;
+	inputs = inputs.replace(patt_distinguish_dval, "YYY");
+	$("#outputbox").val(inputs);
+	/*
+	trnsfr_discnt_yn	char(1)	y	'n'
+	mile_save_yn	char(1)	y	'n'
+	->
+	trnsfr_discnt_ynXXXy	'n'
+	mile_save_ynXXXy	'n'
+	->
+	trnsfr_discnt_ynXXXyYYY'n'
+	mile_save_ynXXXyYYY'n'
+	*/		
+	var outputs = "@primarykey \n * @notnull    ";
+	var outputs2 = "";		
+	var patt_columns	= /[\w]+[XXX]/g;			//trnsfr_discnt_ynXXX
+	var patt_nullable	= /[XXX][\w]+[YYY]/g;	//XXXyYYY
+	var patt_dval			= /[YYY][\w\']*/g;		//YYY'n'
+	var linepatt = /([A-Za-z0-9]+_)/g;
+	var linepatt2 = /(_[A-Za-z0-9]+)/g;
+	var arr_columns		= inputs.match(patt_columns);
+	var arr_nullables	= inputs.match(patt_nullable);
+	var arr_dval			= inputs.match(patt_dval);
+	
+	for(var i=0; i<arr_columns.length; i++) {
+		
+		var column		= arr_columns[i];
+		var nullable	= arr_nullables[i];
+		var dval 			= arr_dval[i];
+		
+		column = column.replace(/[XXX]/g, "");
+		column = column.toUpperCase();
+	
+		dval = dval.replace(/[YYY]/g, "");
+		dval = dval.replace(/[\']/g, "");
+		dval = dval.toUpperCase();
+			
+		if(nullable.search("XXXyYYY") == -1) {//not null column
+			if(i!=0)						outputs = outputs + ", ";
+			
+			if(dval.length > 0)	outputs = outputs + column + "(\"" + dval + "\")";
+			else								outputs = outputs + column;
+	
+			var camelCol = "";
+			var functionCol = "";
+			
+			//MAKE camelCase START/////////////////////////////////////////////////////////////////
+			if(column.search("_") == -1){	// example case : ABNORMALCASE : just convert lowerCase
+				camelCol = column.toLowerCase();
+			}else{													// example case : NORMAL_CASE
+	  		var linearr = column.match(linepatt);
+	  		for(var j=0; j<linearr.length; j++){
+	  			linearr[j] = linearr[j].toLowerCase();
+						camelCol +=	linearr[j].substring(0, 1).toUpperCase() +
+												linearr[j].substring(1, linearr[j].length-1);
+	  		}
+	  		
+				linearr = column.match(linepatt2);
+				var last = linearr[linearr.length-1].toLowerCase();
+				camelCol +=	last.substring(1, 2).toUpperCase() +
+										last.substring(2, last.length);
+			}
+			//MAKE camelCase END///////////////////////////////////////////////////////////////////
+			
+			outputs2 = outputs2 + "bean.set" + camelCol + "();\n" ;
+		}//END OF IF NOT NULL
+	
+	}//END OF FOR LOOP
+	$("#outputbox").val(outputs);
+	$("#outputbox2").val(outputs2);
+}//END OF FUNCTION
+
+function mysqlProcess() {
+	console.log("mysql process()");
+	var inputs = $("#inputbox").val();
+	var outputs = "";
+	var outputs2 = "";
+	var arr;
+	var i = 0;
+	var patt;
+	var patt_space;
+	
+	var arr_field = new Array();
+	var arr_type = new Array();
+	var arr_null = new Array();
+	var arr_key = new Array();
+	var arr_default = new Array();
+	var arr_extra = new Array();
+	
+	/*
+\begin{tabular}{ c  c  c  c  c  c }
+CARD_NUM & varchar(16) & NO & PRI &  & \\ 
+BEF_AUTOLOAD_DATE & varchar(14) & NO & PRI & N & \\ 
+REGION_ID & varchar(3) & YES &  &  & \\ 
+AGENCY_ID & varchar(3) & YES &  &  & \\ 
+\end{tabular}
+	*/
+	//REMOVE begin, end LINE START
+	outputs = "";
+	patt = /[a-zA-Z0-9() &_,{}]+(\\\\)/g;	//FIND "SOMETHING" + "\\" LINE
+	arr = inputs.match(patt);
+	for(i=0; i<arr.length; i++) {
+		outputs = outputs + arr[i] + "\n";
+	}
+	//REMOVE begin, end LINE END
+	
+
+	
+	$("#outputbox").val("");
+	//
+	patt = /[\w(), ]+/g;					//FIND WORD EXCEPT & \\
+	patt_space = /[ ]/g;
+	arr = outputs.match(patt);
+	outputs = "";
+	
+	//ORGANIZE ATTRIBUTE
+	for(i=0; i<arr.length; i++) {
+		var j = i;
+		j = j%6;
+		//outputs = outputs + j + " " + arr[i] + "\n";
+		switch(j) {
+			case 0://field
+				arr_field[arr_field.length] = arr[i].replace(patt_space, "");			break;
+			case 1://type
+				arr_type[arr_type.length] = arr[i].replace(patt_space, "");				break;
+			case 2://null
+				arr_null[arr_null.length] = arr[i].replace(patt_space, "");				break;
+			case 3://key
+				arr_key[arr_key.length] = arr[i].replace(patt_space, "");					break;
+			case 4://default
+				arr_default[arr_default.length] = arr[i].replace(patt_space, "");	break;
+			case 5://extra
+				arr_extra[arr_extra.length] = arr[i].replace(patt_space, "");			break;
+			default:																														break;
+		}
+		
+	}//END OF FORLOOP
+	
+	for(i=0; i<arr_field.length; i++) {
+		console.log( "" + i + " : " + arr_field[i]);
+	}
+	//return;
+	
+	outputs = outputs + " * @primarykey ";	
+	for(i=0; i<arr_field.length; i++) {
+		if(arr_key[i] == MYSQL_LATEX_PRIMARY) {
+			outputs = outputs + arr_field[i] + ", ";
+		}
+	}//END OF FORLOOP
+	
+	outputs = outputs.substring(0, outputs.length-2);
+	outputs = outputs + "\n";
+		outputs = outputs + " * @notnull    ";
+	for(i=0; i<arr_field.length; i++) {
+		if(arr_null[i] == MYSQL_LATEX_NOT_NULL) {
+			if(arr_default[i] != "")
+				outputs = outputs + arr_field[i] + "(\"" + arr_default[i] + "\")" + ", ";
+			else
+				outputs = outputs + arr_field[i] + ", ";
+		}
+	}//END OF FORLOOP
+	
+	$("#outputbox").val(outputs);
+/*	
+ * @primarykey CARD_NUM
+ * @notnull    CARD_NUM, REGIST_RELEAS_CLASS_CD, PREFIX_NUM, CARD_MID_NUM, BL_REGIST_REASN_CD, REGISTR_ID, REGIST_DATE
+ *
+ */
+	
+	var linepatt = /([A-Za-z0-9]+_)/g;
+	var linepatt2 = /(_[A-Za-z0-9]+)/g;
+	var camelCol = "";
+	var functionCol = "";	
+	
+	for(var i=0; i<arr_field.length; i++) {
+		
+		var column		= arr_field[i];
+		var nullable	= arr_null[i];
+		var dval 			= arr_default[i];
+		
+		camelCol = "";
+		functionCol = "";
+	
+		//MAKE camelCase START/////////////////////////////////////////////////////////////////
+		if(column.search("_") == -1){	// example case : ABNORMALCASE : just convert lowerCase
+			camelCol = column.toLowerCase();
+		}else{													// example case : NORMAL_CASE
+  		var linearr = column.match(linepatt);
+  		for(var j=0; j<linearr.length; j++){
+  			linearr[j] = linearr[j].toLowerCase();
+					camelCol +=	linearr[j].substring(0, 1).toUpperCase() +
+											linearr[j].substring(1, linearr[j].length-1);
+  		}
+  		
+			linearr = column.match(linepatt2);
+			var last = linearr[linearr.length-1].toLowerCase();
+			camelCol +=	last.substring(1, 2).toUpperCase() +
+									last.substring(2, last.length);
+		}
+		//MAKE camelCase END///////////////////////////////////////////////////////////////////
+		if( arr_null[i] == MYSQL_LATEX_NOT_NULL )
+			outputs2 = outputs2 + "bean.set" + camelCol + "(\"0\");\n" ;
+	
+	}//END OF FOR LOOP
+	$("#outputbox2").val(outputs2);
+	
+}//END OF FUNCTION
+
+function navvyProcess() {
+///* //NEW PROCESS
+/*
+	#USEAGE
+	DRAG PROTOCOL DOCUMENT'S
+	XML TAG, TYPE, LENGTH
+	DATAS TO INPUT TEXTAREA
+*/
+	var comment_head =
+		"\t<element name=\"XELEMENTX\">\n" +
+		"\t\t<elementType>XTYPEX</elementType>\n" +
+		"\t\t<elementOrgSize>XLENGTHX</elementOrgSize>\n" +
+		"\t\t<elementDBSize>XLENGTHX</elementDBSize>\n";
+	var comment_int_mod = 
+		"\t\t<elementSign>U</elementSign>\n" +
+		"\t\t<elementOrder>BIG</elementOrder>\n";
+	var comment_tail = 
+		"\t\t<elementMod>N</elementMod>\n" +
+		"\t</element>\n";
+	
+	var MESSAGE_ID = "MA401";
+	var BODY_SIZE = 0;
+	var TYPE_TXT = "TXT";
+	var TYPE_INT = "INT";
+	var TYPE_BCD = "BCD";
+	var TYPE_UINT = "UINT";
+	
+	var ERR_ELEMENT_LENGTH = "one data needs ElementName/Type/Length.";
+	var ERR_UNKNOWN = "unexpected error occur.\nthere is no technical support.";
+	var ERR_ELEMENT_TYPE = " is not a type.";
+	
+	var arrElements = new Array();
+	var arrTypes = new Array();
+	var arrLengths = new Array();
+	
+	var regEx = /[\w_]+/g;
+	var regEx_element = /XELEMENTX/g;
+	var regEx_type = /XTYPEX/g;
+	var regEx_length = /XLENGTHX/g;
+	
+	var inputs = $("#inputbox").val();
+	var outputs = "";
+	var output = "";
+	var outputs2 = "";
+	var output2 = "";
+	var output_temp = "";
+	
+	var arrLine = inputs.match(regEx);
+	var i = 0;
+	var j = 0;
+	
+	//VALIDATE INPUT DATA LENGTH//
+	if(arrLine.length%3 != 0) {
+		console.log(arrLine.length);
+		alert(ERR_ELEMENT_LENGTH);
+		return;
+	}
+	
+	//ORGANIZE INPUT DATA TO ARRAYS
+	for(i=0; i<arrLine.length; i++) {
+		//console.log(arrLine[i]);
+		var strLine = arrLine[i];
+		
+		if(i%3 == 0) {
+			arrElements[arrElements.length] = strLine;
+		} else if(i%3 == 1) {
+			arrTypes[arrTypes.length] = strLine;
+		} else if(i%3 == 2) {
+			arrLengths[arrLengths.length] = strLine;
+		} else {
+			alert(ERR_UNKNOWN);	return;
+		}
+	}//END OF FORLOOP FOR ORGANIZE
+
+	//TYPE CONVERT : UINT -> INT
+	for(i=0; i<arrTypes.length; i++) {
+		if(arrTypes[i] == TYPE_UINT) {
+			arrTypes[i] = TYPE_INT;
+		}
+	}//END OF FORLOOP TYPE CONVERT
+
+	//MAKING OUTPUT
+	for(i=0; i<arrElements.length; i++) {
+		
+		var tElement = arrElements[i];
+		var tType = arrTypes[i];
+		var tLength = arrLengths[i];
+		output = comment_head;
+		output2 = "";
+		output_temp = "";
+		
+		if(tType == TYPE_TXT) {
+			
+			output = output + comment_tail;
+			output2 = output2 + "String " + tElement + "_" + tLength + " = \"";
+			for(j=0; j<Number(tLength); j++) {
+				output_temp = output_temp + (j%10);
+			}
+			output2 = output2 + output_temp + "\";\n";
+			output2 = output2 + "AddStringToBody(" + tElement + "_" + tLength + ");\n"
+			BODY_SIZE = BODY_SIZE + Number(tLength);
+			
+		} else if(tType == TYPE_BCD) {
+			
+			output = output + comment_tail;
+			output2 = output2 + "String " + tElement + "_" + tLength + " = \"";
+			for(j=0; j<Number(tLength)*2; j++) {
+				output_temp = output_temp + (j%10);
+			}
+			output2 = output2 + output_temp + "\";\n";
+			output2 = output2 + "AddBcdToBody(" + tElement + "_" + tLength + ");\n";
+			BODY_SIZE = BODY_SIZE + Number(tLength);
+			
+		} else if(tType == TYPE_INT) {
+			
+			output = output + comment_int_mod + comment_tail;	
+			output2 = output2 + "int " + tElement + "_" + tLength + " = 0;\n";
+			output2 = output2 + "AddUintToBody(" + tElement + "_" + tLength + ", " + tLength + ");\n";
+			BODY_SIZE = BODY_SIZE + Number(tLength);
+			
+		} else {
+			
+			console.log("ERR TYPE : " + tType);
+			alert("[" + tType + "]"  + ERR_ELEMENT_TYPE);	return;
+			
+		}
+		
+		output = output.replace(regEx_element, tElement + "_" + MESSAGE_ID);
+		output = output.replace(regEx_type, tType);
+		output = output.replace(regEx_length, tLength);
+		outputs = outputs + output;
+		outputs2 = outputs2 + output2;
+		
+	}//END OF FORLOOP FOR MAKING OUTPUT
+	
+	$("#outputbox").val(outputs);
+	$("#outputbox2").val(outputs2);
+	alert("BODY SIZE : " + BODY_SIZE);
+	
+/* //OLD PROCESS
+	var comment =
+		"\t<element name=\"XXX\">\n" +
+		"\t\t<elementType></elementType>\n" +
+		"\t\t<elementOrgSize>0</elementOrgSize>\n" +
+		"\t\t<elementDBSize>0</elementDBSize>\n" +
+		"\t\t<elementMod>N</elementMod>\n" +
+		"\t</element>\n"
+	
+	var MESSAGE_ID = "MA401";
+	
+	var regEx00 = /[\w_]+/g;
+	var regEx01 = /XXX/g;
+	
+	var inputs = $("#inputbox").val();
+	var outputs = "";
+	
+	var arrLine = inputs.match(regEx00);
+	for(i=0; i<arrLine.length; i++) {
+		//console.log(arrLine[i]);
+		var strLine = arrLine[i] + "_" + MESSAGE_ID;
+		var output = "";
+		output = comment.replace(regEx01, strLine);
+		//console.log(output);
+		outputs = outputs + output;
+	}
+	
+	//inputs = inputs.replace(/[,]/g, "\n");
+	$("#outputbox").val(outputs);
+*/
+
+}//END OF FUNCTION
+
+function parsingTest() {
+	var inputs = $("#inputbox").val();
+	var arr;
+	
+	var regEx01 = /[\w_ (\']+/g;
+	
+}
+</script>
+</head>
+
+<body>
+	
+<div style="position:fixed; float:left;background-color:white;">
+	<select id="slct">
+		<option id="slctOpt_oracle" value="oracle">ORACLE</option>
+		<option id="slctOpt_mysql" value="mysql">MYSQL</option>
+		<option id="slctOpt_message" value="message">VARIETY</option>
+		<option id="slctOpt_parsing" value="parsing">PARSING</option>
+	</select>
+	<button id="btn" name="btn" style="border:1px solid #ddd;background:white;">SAVE YOUR TIME</button>
+	<button id="clr" name="btn" style="border:1px solid #ddd;background:white;">CLEAR</button>
+<!--	<br><img src="https://cdn4.iconfinder.com/data/icons/dortmund/Dortmund-32x32/config.png" style="height:9px;">
+	<b>configuration</b> : edit dbType in the source code. ORACLE/MYSQL.
+-->
+	<br><img src="https://cdn4.iconfinder.com/data/icons/dortmund/Dortmund-32x32/full-time.png" style="height:9px;">
+	<b>usage</b>(oracle:pl/sql)  : open new SQL Window, type (TABLE NAME), right click, Describe, drag Name ~ Default, copy & paste to first textarea.
+	<br><img src="https://cdn4.iconfinder.com/data/icons/dortmund/Dortmund-32x32/full-time.png" style="height:9px;">
+	<b>usage</b>(mysql :heidiSQL): in the SQL Window, type DESC (TABLE_NAME), execute(F9), right click result View, 격자행 내보내기, 출력형식:LaText, 확인, paste to first textarea.
+	<br><img src="https://cdn4.iconfinder.com/data/icons/dortmund/Dortmund-32x32/email.png" style="height:9px;">
+	<b>feedback</b> : herdin86@gmail.com 
+</div><br><br><br><br><br>
+
+<div>
+	<textarea id="inputbox" rows="15" cols="80"></textarea>
+	<textarea id="outputbox" class="output" rows="15" cols="80"></textarea>
+	<textarea id="outputbox2" class="output" rows="15" cols="80"></textarea>
+</div>
+
+<div style="visibility:hidden;">
+	<ul>
+	<li>li tag1</li>
+	<li>li tag2</li>
+	<li>li tag3</li>
+	<li>li tag4</li>
+	<li style="list-style-image: url('http://sstatic.naver.net/search/2014/h_logo.png');">styled li tag5</li>
+	</ul>
+</div>
+
+</body>
+</html>
+

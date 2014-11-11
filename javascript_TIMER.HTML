@@ -1,0 +1,119 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=EUC-KR">
+<style type="text/css">
+	@import url(http://fonts.googleapis.com/earlyaccess/nanumgothic.css);
+	body, button, textarea, input{
+		font-size : 12px;
+		font-family:	'Nanum Gothic';
+		font-backup:	'Audiowide',
+									'Shadows Into Light',
+									'Bangers',
+									cursive;
+									
+	}
+	.hms{
+		Background-color: white;
+		border: 0px;
+		color: black;
+		font-size:20px;
+	}
+	.cs{
+		background-color: white;
+		border: 0px;
+		color: grey;
+		font-size:15px;
+	}
+</style>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+			<script type="text/javascript">
+				var buttonOnoff = false;
+				var timerID, oldTime, currentTime;
+				var timerID2;
+				function timerButton() {
+					if (buttonOnoff) { 	//END
+						buttonOnoff = false;
+						timerEnd();
+						document.getElementById('button1').value = 'RUN';
+						document.getElementById('history').innerHTML = 
+							  document.getElementById('history').innerHTML 
+							+ "<span class=\"hms\">"	+ $("#output1").html() + "</span>"
+							+ "." 
+							+ "<span class=\"cs\">"		+ $("#output2").html() + "</span>"
+							+ "&emsp;" + $("#reason").val()
+							+ "<br>";
+							$("#reason").val("");
+							
+							
+							
+							
+							
+							
+					} else {						//START
+						timerStart();
+						document.getElementById('button1').value = 'LAB';
+						buttonOnoff = true;
+						document.getElementById('output1').innerHTML = '00:00:00';
+					}
+				}
+				function timerStart() {
+					var d = new Date();
+					oldTime = d.getTime();
+					timerID2 = setInterval(
+							'timerMain2()', 10);
+					timerID = setInterval('timerMain()',
+							1000);
+				}
+				function timerEnd() {
+					clearInterval(timerID2);
+					clearInterval(timerID);
+				}
+				function timerMain2() {
+					var d = new Date();
+					currentTime = d.getTime();
+					var elapsedtime = currentTime
+							- oldTime;
+					elapsedtime = parseInt((elapsedtime % 1000) / 10);
+					document.getElementById('output2').innerHTML = leadingZeros(
+							elapsedtime, 2);
+				}
+				function timerMain() {
+					var currentTime_temp = parseInt(currentTime / 1000);
+					var elapsedtime = currentTime_temp
+							- parseInt(oldTime / 1000);
+					document.getElementById('output1').innerHTML = secToHHMMSS(elapsedtime);
+				}
+				function secToHHMMSS(sec) {
+					var myHour, myMin, mySec;
+					mySec = sec % 60;
+					myMin = sec / 60 % 60;
+					myHour = sec / 3600;
+					return leadingZeros(parseInt(myHour), 2) + ':'
+							+ leadingZeros(parseInt(myMin), 2) + ':'
+							+ leadingZeros(parseInt(mySec), 2);
+				}
+				function leadingZeros(n, digits) {
+					var zero = '';
+					n = n.toString();
+					if (n.length < digits) {
+						for (i = 0; i < digits - n.length; i++)
+							;
+						zero += '0';
+					}
+					return zero + n;
+				}
+			</script>
+<title>TIMER Alpha 20140930 ver</title>
+</head>
+<body>
+	<span class="hms" id="output1" name="output1">00:00:00</span>.<span type="button" class="cs" id="output2" name="output2">00</span>
+		
+	<input type="button" id="button1" name="button1" value="RUN" onclick="timerButton()"
+		style=" background-color: white; border:1px" />
+		
+	<input	type="text"		id="reason"	name="reason" />
+	<br>
+	<div id="history"></div>
+</body>
+</html>
