@@ -1,0 +1,9 @@
+현재 프로젝트에서 사용하는 자바 라이브러리 위치를 파악한다.
+
+JRE
+Program Files\Java\jre7\lib..
+
+comm.jar->
+win32com.dll->Java\jre7\bin
+
+javax.comm.properties->Java\jre7\lib
