@@ -1,0 +1,203 @@
+<!doctype html>
+<meta charset="utf-8">
+<html>
+<head>
+<!--<META content="text/html; charset=utf-8" http-equiv=Content-Type>
+ <META name=GENERATOR content="TAGFREE Active Designer"> -->
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+<script type=text/javascript>
+//GLOBAL VARIABLE
+var fileContent = "";
+var testUrl = "http://gofficeplus.lgcns.com/Message.do?method=listExcelDown&listType=0&blogDeptCd=76811";
+var strUrl = "http://gofficeplus.lgcns.com/Message.do?method=listExcelDown&listType=0&blogDeptCd=";
+var arrNum = new Array();
+var arrNm = new Array();
+/*
+arrNum[0]  = "69439"; arrNm[0] = "KIWAN PARK";
+arrNum[1]  = "52115"; arrNm[1] = "WOOGA XON";
+arrNum[2]  = "73211"; arrNm[2] = "LIM KYU TAE";
+arrNum[3]  = "71644"; arrNm[3] = "JongChun Kim";
+arrNum[4]  = "72302"; arrNm[4] = "Yongha Jin";
+arrNum[5]  = "75232"; arrNm[5] = "Seongyup Kim";
+arrNum[6]  = "73522"; arrNm[6] = "Jiyoung Nam";
+arrNum[7]  = "76980"; arrNm[7] = "TAESUNG SUK";
+arrNum[8]  = "76105"; arrNm[8] = "Sang Geun Lee";
+arrNum[9]  = "77338"; arrNm[9] = "SONGEE KIM";
+arrNum[10] = "75451"; arrNm[10] = "Ye Jin Kim";
+arrNum[11] = "75442"; arrNm[11] = "June Hyouk Kim";
+arrNum[12] = "74956"; arrNm[12] = "Hakkeun Kim";
+arrNum[13] = "74942"; arrNm[13] = "Joohee Moon";
+arrNum[14] = "77339"; arrNm[14] = "Jinhwa Park";
+arrNum[15] = "75978"; arrNm[15] = "JONGMIN BAEK";
+arrNum[16] = "72918"; arrNm[16] = "Kyungtae Lee";
+arrNum[17] = "78624"; arrNm[17] = "Doe Eon KIM";
+arrNum[18] = "76764"; arrNm[18] = "Se Wook Kim";
+arrNum[19] = "76912"; arrNm[19] = "Leekyung Kim";
+arrNum[20] = "78575"; arrNm[20] = "Jingoo Kim";
+arrNum[21] = "78626"; arrNm[21] = "chansik kim";
+arrNum[22] = "76705"; arrNm[22] = "Hyun Ku Bae";
+arrNum[23] = "76975"; arrNm[23] = "GAIM YANG";
+arrNum[24] = "76847"; arrNm[24] = "Eunji Yang";
+arrNum[25] = "78625"; arrNm[25] = "Yang jaeseok";
+arrNum[26] = "76702"; arrNm[26] = "SEURGI IM";
+arrNum[27] = "76811"; arrNm[27] = "SoonMin Jang";
+arrNum[28] = "77331"; arrNm[28] = "Changwan Choi";
+arrNum[29] = "77340"; arrNm[29] = "SeongHo Han";
+*/
+	
+	
+
+$(document).ready(function() {
+	$("#version").html(Date());
+
+	$("#saveTime").click(function() {
+		if(jangHelper_init())
+			jangHelper_start();
+			//alert("instead of jangHelper_start()");
+		else
+			alert("input file first.");
+	});//END OF saveTime2 CLICK EVENT
+
+	var fileInput = $("#fileInput").get(0);//document.getElementById("fileInput");
+	fileInput.addEventListener("change",
+	//change eventListener start
+		function(e) {
+			fileContent = "";
+			var filee = fileInput.files[0];
+			var textType = /text.*/;
+			if(filee.type.match(textType)) {
+				var reader = new FileReader();
+				reader.onload = function(e) {
+													$("#fileContent").val(reader.result);
+												}
+				reader.readAsText(filee);
+			} else {
+				$("#chk").html("File not supported");
+			}
+		});
+		//change eventListener end
+
+});//END OF READY
+
+
+function jangHelper_init() {
+	var i = 0; var j = 0;
+	
+	var fileContent = $("#fileContent").val();
+	if(fileContent.length == 0)
+		return false;
+		
+	var linePat = /[\w ]+/g;
+	var innerLinePat = /[\w]+/g;
+	var lines = fileContent.match(linePat);
+
+	for(i=0; i<lines.length; i++) {
+		var words = lines[i].match(innerLinePat);
+		for(j=0; j<words.length; j++) {
+			if(j == 0) 
+				arrNum[i] = words[j]; 
+			else
+				arrNm[i] = words[j];
+		}//END OF INNER FORLOOP
+	}//END OF OUTER FORLOOP
+		
+	return true;
+}
+
+var intervalf;
+var inx;
+function jangHelper_start() {
+	$("#chk").html("");
+	$("#pbar").attr("max", arrNum.length);
+	intervalf = setInterval(function(){ jangHelper_processing(); }, 1000);
+	inx = 0;
+}
+
+function jangHelper_processing() {
+	if(inx == arrNum.length) {
+		jangHelper_end();
+		return;
+	}
+	
+	var newA = document.createElement("a");
+	newA.id = arrNum[inx];
+	newA.innerHTML = arrNum[inx] + "_" + arrNm[inx];
+	newA.href = strUrl + arrNum[inx];
+	newA.style.visibility = "hidden";
+	document.body.appendChild(newA);
+	document.body.appendChild(document.createElement("br"));
+	newA.click();
+	$("#pbar").attr("value", ++inx);
+}
+
+function jangHelper_end() {
+	window.clearInterval(intervalf);
+}
+
+
+	/*
+	var fi = document.getElementById("fileInput");
+	var el = "";
+	var elList;
+	for(el in fi) {
+		var attr = fi.getAttribute(el);
+		if(attr != null)
+			elList = elList + el + " : "  + attr + "<br>";
+	}
+	$("#chk").html(elList);
+	
+	
+	
+	
+	function delay(gap) {
+		var then, now;
+		var i = 1;
+		then = new Date().getTime();
+		now = then;
+		while( (now-then) < gap ) {
+			now = new Date().getTime();
+			console.log(i++);
+		}
+	}
+
+
+	$("#jqtest2").click(function() {
+		$.ajax({
+			type:"get",
+			url:testUrl,
+			dataType : "jsonp",
+			success:function(result) {
+								alert("goooooooood");
+							},
+			error:function(result) {
+							alert("baaaad");
+						}
+		});
+	});//END OF jqtest2 CLICK EVENT
+	*/
+
+</script>
+</head>
+<body>
+<div id="version"></div>
+<p>
+	
+	<input type="file" id="fileInput">
+	<div id="chk"></div>
+	
+<input type="button" id="saveTime" value="saveTime" style="background:white; border:1px solid #ddd;"/>
+<progress 					 id="pbar" value="0" max="100"></progress>
+</p>
+
+
+<div style="visibility:hidden;">
+<!--
+	<a href="data:application/text;charset=utf-8, Hello HTML5" download="hellowHtml5.txt">download test</a> <br> 
+	<input type="button" id="jqtest2" value="jqtest2" style="background:white; border:1px solid #ddd;"/>
+	<input type="button" value="test" onclick=""	style="background:white; border:1px solid #ddd;"/>
+	<input type="hidden" id="jqtest" value="3"/>
+-->
+	<textarea id="fileContent"></textarea>
+</div>
+</body>
+</html>
