@@ -1,0 +1,210 @@
+﻿<style type="text/css">
+.post_list0{
+  //border:1px solid;
+  //border-color:#ebebeb;
+  //padding:10px;
+  //width:100px
+}
+.post_list1 a{
+  font-family: 'Nanum Gothic', sans-serif;
+  color:black;
+}
+</style>
+
+<div class='post_list0'>  
+	<div id="posts" class='post_list1' style="padding: 10px;"></div>  
+	<div align="center" id="posts-pgno" style="cursor: pointer;"></div>  
+</div>
+
+<script language="Javascript" type="text/javascript">  
+ /** url의 Parameter를 얻는 Class. **/  
+var request = {   
+  parameter: function(name) {
+		return this.parameters()[name];  
+	},  
+
+	parameters: function() {  
+		var result = {};  
+		var url = window.location.href;  
+		var parameters = url.slice(url.indexOf('?') + 1).split('&');  
+      
+		for(var i = 0;  i < parameters.length; i++) {  
+			var parameter = parameters[i].split('=');  
+			result[parameter[0]] = parameter[1];  
+		}  
+		return result;  
+  }  
+}
+
+ /** Page의 정보를 저장. **/  
+var page = {  
+	//초기화.  
+	init: function(home,max){  
+		page.home = home;  
+		page.max = max;  
+		page.label = '';  
+		page.no = 1;  
+	},     
+     
+  //url의 parameter에서 pgno 값을 읽어 옮.  
+  setPage: function(){  
+		var url = window.location.href;  
+		var pl = url.lastIndexOf("/label/");  
+		var pq = url.lastIndexOf("?");  
+		 
+		if(pl != -1)  
+			page.label = url.substr(pl+7,((pq!=-1)?pq:url.length)-(pl+7));  
+
+		if(url.indexOf("pgno") != -1)  
+			page.no = request.parameter("pgno");        
+  }
+}
+
+ /** feed를 parsing 하여 결과 뿌려 줌. **/  
+ var obj = {  
+  init: function () {  
+   obj.obj = document.getElementById('posts');  
+   obj.pgno = document.getElementById('posts-pgno');  
+  },  
+    
+  // 검색을 요청하는 함수   
+  pingSearch: function () {  
+   //변수 선언.  
+   obj.s = document.createElement('script');  
+   obj.s.type = 'text/javascript';  
+   obj.s.charset = 'utf-8';  
+     
+   //feed callback 함수를 이용 json 객체 구한 후 pongSearch 함수호출.   
+   if(page.label == '')  
+    obj.s.src = '' + page.home +   
+     '/feeds/posts/summary/?max-results='+(page.no*page.max)  
+     +'&alt=json-in-script&callback=obj.pongSearch';  
+   else  
+    obj.s.src = '' + page.home + '/feeds/posts/summary/-/'  
+     +page.label+'?max-results='+(page.no*page.max)  
+     +'&alt=json-in-script&callback=obj.pongSearch';  
+      
+   //append.  
+   document.getElementsByTagName('head')[0].appendChild(obj.s);  
+  },  
+     
+  // 검색 결과를 뿌리는 함수   
+  pongSearch: function (z) {  
+   obj.obj.innerHTML = '';  
+     
+   /* 글 목록을 뿌려 줌. */  
+	for (var i = (page.no-1)*page.max; i < page.no*page.max; i++) {  
+		//console.log(i);
+		//예외처리.  
+		if(i >= z.feed.openSearch$totalResults.$t) break;  
+		  
+		//변수선언.  
+		var li = document.createElement("li");  
+		var a = document.createElement('a');  
+		  
+		//link로 사용할 base url.  
+		var url = page.home + '/search';
+		if(page.label != '')  
+		 url += '/label/' + page.label;  
+		  
+		//최종 link를 url 입력.
+		if (i == 0)   
+			a.href = url + '?max-results=1';  
+		else {
+			//console.log(z.feed.entry[i-1].published.$t);
+			var pub = obj.changeTime(z.feed.entry[i-1].published.$t);  
+			a.href = url + '?updated-max=' + pub   
+			+ '&max-results=1&pgno='+page.no;  
+		}  
+		a.innerHTML = obj.escapeHtml(z.feed.entry[i].title.$t);  
+		   
+		//append  
+		li.appendChild(a);  
+		obj.obj.appendChild(li);  
+   } //END OF FOR LOOP
+      
+   /* page 뿌려줌. */  
+   obj.pongPgno(z);  
+  },  
+    
+  // page를 뿌려주는 함수.  
+  pongPgno: function(z){  
+		obj.pgno.innerHTML = '';  
+		var before = document.createElement('a');  
+		var next = document.createElement('a');  
+		 
+		var ten = parseInt((page.no-1)/10);  
+		var total = z.feed.openSearch$totalResults.$t;  
+  
+		/* before page */  
+		
+		if(ten>0){
+			before.innerHTML = '<';
+			obj.onMouseDown(before, ten*10);
+		}
+		obj.pgno.appendChild(before);  
+
+		/* page number */  
+		for(var i=ten*10; i< (ten+1)*10; i++){  
+			if(i >= total/page.max) break;  
+			var a = document.createElement('a');  
+			obj.onMouseDown(a, i+1);  
+			a.innerHTML = ' ' + (i+1) + ' ';
+			
+			if(i+1 == page.no){ //current page
+				a.style.fontSize = '15px';
+				a.style.fontWeight ='bold';
+			}
+			
+			obj.pgno.appendChild(a);  
+		}
+      
+		/* next page */  
+		
+		if(ten< parseInt(total/page.max/10)){
+			next.innerHTML = '>';  
+			obj.onMouseDown(next, (ten+1)*10+1);
+		}
+		obj.pgno.appendChild(next);  
+  },  
+     
+  //mouse click event.  
+  onMouseDown: function(a, i){  
+		a.onmousedown = function(){  
+			page.no = i;  
+			obj.pingSearch();  
+		}  
+  },  
+  
+  //Time 에러 수정.  
+  changeTime: function(str){  
+    var s = str.lastIndexOf('.')-1;  
+    var e = str.lastIndexOf('+')+1;  
+  
+    if(e<1){  
+        e = str.lastIndexOf('-')+1;  
+        var str2 = str.substr(0,s) + '-' + str.substr(e,100);  
+    }  
+    else
+        var str2 = str.substr(0,s) + '%2B' + str.substr(e,100);  
+    return str2;
+//		var s = str.lastIndexOf('.')-1;  
+//		var e = str.lastIndexOf('-')+1; 
+//		var str2 = str.substr(0,s) + '-' + str.substr(e,100);     
+//		return str2;  
+  },  
+    
+  // HTML태그 안 먹게 하는 함수  
+  escapeHtml: function (str) {  
+   str = str.replace(/&/g, "&");  
+   str = str.replace(/</g, "<");  
+   str = str.replace(/>/g, ">");  
+   return str;  
+  }  
+ };  
+  
+ page.init('http://herdin86.blogspot.kr', 5);  
+ page.setPage();  
+ obj.init();   
+ obj.pingSearch();  
+</script>
