@@ -2,8 +2,12 @@ package com.harm.unmani;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -13,6 +17,7 @@ import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
+import javax.xml.bind.DataBindingException;
 
 @SuppressWarnings("serial")
 public class JangHelper extends JFrame{
@@ -115,7 +120,7 @@ public class JangHelper extends JFrame{
 		
 	}//END OF startSwing
 	
-	public static boolean debug = false;
+	public static boolean debug = true;
 	public static void print(String msg) {
 		if(debug)
 			System.out.print(msg);
@@ -124,8 +129,12 @@ public class JangHelper extends JFrame{
 		if(debug)
 			System.out.println(msg);
 	}
-	public static void main(String[] args) throws Exception {	
-		 {
+	
+	
+	
+	public static void main(String[] args) {
+		
+		try {
 			BufferedReader reader = null;
 			String line = null;
 			String defaultXlsName = "MessageComment";
@@ -140,16 +149,33 @@ public class JangHelper extends JFrame{
 			ArrayList<String> contacList = null;
 			
 			//read config file
-			reader = new BufferedReader(new FileReader("jangHelper_config.txt"));
-			while((line=reader.readLine()) != null) {
-				empNumList.add(line.substring(0, line.indexOf(" ")));
-				empNmList.add(line.substring(line.indexOf(" ") + 1, line.length()));	
-				lineCnt++;
+			//74053 EmpName1
+			//74054 EmpName2
+			try {
+				reader = new BufferedReader(new FileReader("jangHelper_config.txt"));
+				
+			} catch (FileNotFoundException e) {
+				println("catch FileNotFoundException[1] : config file not found. : " + e.getStackTrace());
+				throw new Exception();
 			}
-			reader.close();
+			
+			try {
+				//ORGANIZE EMP NUM, NAME TO ARRAYS
+				while((line=reader.readLine()) != null) {
+					empNumList.add(line.substring(0, line.indexOf(" ")));
+					empNmList.add(line.substring(line.indexOf(" ") + 1, line.length()));	
+					lineCnt++;
+				}
+				reader.close();
+			} catch (IOException e) {
+				println("catch IOException[1] : readLine exception. : " + e.getStackTrace());
+				throw new Exception();
+			}
+			
 			println("config file load ok");
 			
 			//init check table
+			//lineCnt = EmpCnt in config file
 			insaneChkList = new int[lineCnt][];
 			for(int i=0; i<lineCnt; i++) {
 				insaneChkList[i] = new int[lineCnt];
@@ -159,6 +185,9 @@ public class JangHelper extends JFrame{
 			}
 			
 			//init comment file name list
+			//MessageComment.xls
+			//MessageComment (1).xls
+			//MessageComment (2).xls ...
 			fileList.add(defaultXlsName + fileExtension);
 			for(int i=1; i<lineCnt; i++) {
 				fileList.add(defaultXlsName + " (" + i + ")" + fileExtension); 
@@ -174,56 +203,99 @@ public class JangHelper extends JFrame{
 //            2014-09-13 10:33:56 
 //        </td>
 			//collect contact list
-			for(int inx = 0; inx<fileList.size(); inx++) {
-				reader = new BufferedReader(new InputStreamReader(new FileInputStream(fileList.get(inx)), "utf-8"));
+			Calendar cal = Calendar.getInstance();
+			int fileIndex;
+			
+			for(fileIndex = 0; fileIndex<fileList.size(); fileIndex++) {
+//				println(fileList.get(fileIndex));
+				
+				try {
+					reader = new BufferedReader(new InputStreamReader(new FileInputStream(fileList.get(fileIndex)), "utf-8"));
+				} catch (UnsupportedEncodingException e) {
+					println("catch UnsupportedEncodingException[1] : input stream reader exception : " + e.getStackTrace());
+					throw new Exception();
+				} catch (FileNotFoundException e) {
+					println("catch FileNotFoundException[2]  : file input stream exception : " + e.getStackTrace());
+					throw new Exception();
+				}
+				
 				contacList = new ArrayList<String>();
 				SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 				Date writtenDate = null;
-				while((line=reader.readLine()) != null) {
-					//System.out.println(line);
-					if(line.indexOf("<td class=\"blog_reply_info") != -1) {
-						reader.readLine();			// team name
-						reader.readLine();			// </td>
-						reader.readLine();			// <td class ...>
-						line = reader.readLine();	// emp name
-						line = line.trim();
-						contacList.add(line.substring(0, line.indexOf(" ")));
-						
-						reader.readLine();			// </td>
-						reader.readLine();			// <td class ...>
-						line = reader.readLine();	// time
-						line = line.trim();
-						writtenDate = dateFormat.parse(line);
-						Calendar cal = Calendar.getInstance();
-						cal.setTime(new Date());
-						int monthNow = cal.get(Calendar.MONTH) + 1;
-						cal.setTime(writtenDate);
-						int monthPast = cal.get(Calendar.MONTH) + 1;
-						//System.out.println(monthNow + " / " + monthPast);
-						if(monthNow-1 != monthPast) {
-							if(monthNow-1 < monthPast) {
-								contacList.remove(contacList.size()-1);
-							} else {
-								contacList.remove(contacList.size()-1);
+				//Date nowDate = new Date();
+				Date nowDate = dateFormat.parse("2014-12-13 10:33:56");
+				
+				try {
+					
+					while((line=reader.readLine()) != null) {
+														//println(line);
+						if(line.indexOf("<td class=\"blog_reply_info") != -1) {
+							
+							reader.readLine();			// team name
+							reader.readLine();			// </td>
+							reader.readLine();			// <td class ...>
+							line = reader.readLine();	// emp name => 최창완 사원
+							line = line.trim();
+							String contacEmpName = line.substring(0, line.indexOf(" "));
+							
+							reader.readLine();			// </td>
+							reader.readLine();			// <td class ...>
+							line = reader.readLine();	// time
+							line = line.trim();
+							
+							writtenDate = dateFormat.parse(line);
+							cal.setTime(writtenDate);
+							int writtenMonth = cal.get(Calendar.MONTH) + 1;
+							
+							cal.setTime(nowDate);
+							cal.add(Calendar.MONTH, -1);
+							int measureMonth = cal.get(Calendar.MONTH) + 1;
+							cal.add(Calendar.MONTH, -1);
+							int exceptLimitMonth = cal.get(Calendar.MONTH) + 1;
+							
+							if(writtenMonth == exceptLimitMonth) {
+								//no need to exam past month
 								break;
+							} else if(writtenMonth == measureMonth) {
+								contacList.add(contacEmpName);
 							}
-						}
-					}//END OF IF
-				}//END OF INNER WHILELOOP
-			
-				//check contact list
+							
+							//System.out.println(monthNow + " / " + monthPast);
+//							if(monthNow-1 == monthPast) {
+//								contacList.add(contacEmpName);
+//							} else {
+//								if(monthNow)
+//							}
+						}//END OF IF
+					}//END OF INNER WHILE-LOOP : ONE FILE READ
+					
+				} catch (IOException e) {
+					println("catch IOException[2] : read line exception : " + e.getStackTrace());
+					throw new Exception();
+				} catch (ParseException e) {
+					println("catch ParseException[1] : simple date formatter parse exception : " + e.getStackTrace());
+					throw new Exception();
+				} finally {
+					try {
+						reader.close();
+					} catch (IOException e) {
+						println("catch IOException[3] : reader close exception : " + e.getStackTrace());
+						throw new Exception();
+					}
+				}
+				
+				//START OF FOR-LOOP : check contact list
 				for(int i=0; i<contacList.size(); i++) {
 					String contacNm = contacList.get(i);
 					for(int j=0; j<empNmList.size(); j++) {
 						if(empNmList.get(j).equals(contacNm)) {
-							insaneChkList[j][inx] = 1;
+							insaneChkList[j][fileIndex] = 1;
 							break;
 						}
 					}
 				}//END OF INNER FORLOOP
 			
 			}//BE OUTER FORLOOP : FILE
-			reader.close();
 			
 			//sum contact check
 			int[] insaneChkSum = new int[lineCnt];
@@ -242,6 +314,11 @@ public class JangHelper extends JFrame{
 			//show result via swing
 			new JangHelper(lineCnt, empNumList, empNmList, insaneChkList, insaneChkSum).startSwing();
 			println("normal exit");
-		}
+
+		 } catch (Exception e) {
+			 println("catch MAIN Exception : " + e.getStackTrace());
+		 }//END OF TRY/CATCH
+		
 	}//END OF main()
+	
 }//END OF CLASS
