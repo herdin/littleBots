@@ -8,9 +8,18 @@
 <script type=text/javascript>
 //GLOBAL VARIABLE
 var fileContent = "";
-var testUrl = "http://gofficeplus.lgcns.com/Message.do?method=listExcelDown&listType=0&blogDeptCd=76811";
-var strUrl = "http://gofficeplus.lgcns.com/Message.do?method=listExcelDown&listType=0&blogDeptCd=";
-var testUrl2 = "http://gofficeplus.lgcns.com/MbMain.do?method=addHappy&type=H&sysTypeCd=BL&publicFg=Y&docId=76811&blogEmpNo=76705&replyOwnrId=76705&contents=test";
+var testUrl = "http://gofficeplus.lgcns.com/MbMain.do?method=addHappy&type=H&sysTypeCd=BL&publicFg=Y&docId=76811&blogEmpNo=76705&replyOwnrId=76705&contents=test";
+var strUrl = "http://gofficeplus.lgcns.com/MbMain.do?method=addHappy&type=H&sysTypeCd=BL&publicFg=Y";
+var targetEmpNum = "&docId=";
+var userEmpNum = "&blogEmpNo=";
+var replyOwnrId = "&replyOwnrId=";
+var contents = "&contents=";
+
+var ERROR_PROGRAM_UNKNOWN = "invalid program exit status.";
+var ERROR_NOT_SUPPORT_FILE_TYPE = "invalid file type.";
+
+var workingWindow;
+
 var arr_Number = new Array();
 var arr_Name = new Array();
 var arr_Contents = new Array();
@@ -46,9 +55,6 @@ arrNum[27] = "76811"; arrNm[27] = "SoonMin Jang";
 arrNum[28] = "77331"; arrNm[28] = "Changwan Choi";
 arrNum[29] = "77340"; arrNm[29] = "SeongHo Han";
 */
-var ERROR_FILE_PATTERN = "invalid config file content.";
-var ERROR_PROGRAM_UNKNOWN = "invalid program exit status.";
-var ERROR_NOT_SUPPORT_FILE_TYPE = "invalid file type.";
 
 $(document).ready(function() {
 	$("#version").html(Date());
@@ -64,7 +70,6 @@ $(document).ready(function() {
 	var fileInput = $("#fileInput").get(0);//document.getElementById("fileInput");
 	
 	fileInput.addEventListener("change",
-		//change eventListener start
 		function(e) {
 			fileContent = "";
 			var filee = fileInput.files[0];
@@ -74,16 +79,14 @@ $(document).ready(function() {
 				reader.onload = function(e) {
 													$("#fileContent").val(reader.result);
 												}
-				reader.readAsText(filee);
+				reader.readAsText(filee, "UTF-8");//euc-kr
 			} else {
 				$("#chk").html(ERROR_NOT_SUPPORT_FILE_TYPE);
-			}
+			}//END OF IF/ELSE
 		});
-		//change eventListener end
+		//END OF EVENT LISTENER
 
 });//END OF READY
-
-var FILE_CONTENT_ROW_NUMBER = 3;
 
 function addCommentor_init() {
 	var i = 0; var j = 0;
@@ -92,33 +95,30 @@ function addCommentor_init() {
 	if(fileContent.length == 0)
 		return false;
 		
-	var pattern_line = /[\w ]+/g;
-	var pattern_innerLine = /[\w]+/g;
+	var pattern_line = /[\wㄱ-힣 ]+/g;
+	var pattern_innerLine = /[\wㄱ-힣]+/g;
 	var lines = fileContent.match(pattern_line);
 
+	//console.log("fileContent : " +fileContent);
 	for(i=0; i<lines.length; i++) {
 		
 		var words = lines[i].match(pattern_innerLine);
-		
-		if(words.length != FILE_CONTENT_ROW_NUMBER) {
-			alert(ERROR_FILE_PATTERN);
-			return false;
-		}
+		arr_Contents[i] = "";
 		
 		for(j=0; j<words.length; j++) {
+			console.log(words[j]);
 			if(j == 0) {
 				arr_Number[i] = words[j]; 
 			} else if(j == 1) {
 				arr_Name[i] = words[j];
-			} else if(j == 2) {
-				arr_Contents[i] = words[j];
 			} else {
-				alert(ERROR_FILE_PATTERN);
-				return false;
+				arr_Contents[i] += words[j] + " ";
 			}
 		}//END OF INNER FORLOOP
 	}//END OF OUTER FORLOOP
-		
+	
+	workingWindow = window.open("", "workingWindow");
+	
 	return true;
 }
 
@@ -129,7 +129,7 @@ function addCommentor_start() {
 	$("#chk").html("");
 	$("#pbar").attr("max", arr_Number.length);
 	inx = 0;
-	intervalf = setInterval(function(){ addCommentor_processing(); }, 1000);
+	intervalf = setInterval(function(){ addCommentor_processing(); }, 2000);
 }
 
 function addCommentor_processing() {
@@ -141,8 +141,13 @@ function addCommentor_processing() {
 	var newA = document.createElement("a");
 	newA.id = arr_Number[inx];
 	newA.innerHTML = arr_Number[inx] + "_" + arr_Name[inx];
-	newA.href = strUrl + arr_Number[inx];
+	newA.href =	strUrl +
+							targetEmpNum + arr_Number[inx] +
+							userEmpNum + arr_Number[inx] +		//it means userEmpNumber but it doesn't work.. useless maybe(1)
+							replyOwnrId + arr_Number[inx] +		//it means userEmpNumber but it doesn't work.. useless maybe(2)
+							contents + arr_Contents[inx];
 	newA.style.visibility = "hidden";
+	newA.target = "workingWindow";
 	document.body.appendChild(newA);
 	document.body.appendChild(document.createElement("br"));
 	newA.click();
@@ -151,19 +156,21 @@ function addCommentor_processing() {
 
 function jangHelper_end() {
 	window.clearInterval(intervalf);
+	workingWindow.close();
 }
 
 </script>
 </head>
 <body>
+	
 <div id="version"></div>
+
 <p>
 	<input type="file" id="fileInput">
 	<div id="chk"></div>
 	<input type="button" id="saveTime" value="saveTime" style="background:white; border:1px solid #ddd;"/>
 	<progress 					 id="pbar" value="0" max="100"></progress>
 </p>
-
 
 <div style="visibility:hidden;">
 	<textarea id="fileContent"></textarea>
