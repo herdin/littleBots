@@ -152,8 +152,8 @@ function addCommentor_processing() {
 	document.body.appendChild(newA);
 	document.body.appendChild(document.createElement("br"));
 	
-	//console.log(arr_Contents[inx] + " | url : " + newA.href);
-	newA.click();
+	console.log(arr_Contents[inx] + " | url : " + newA.href);
+	//newA.click();
 	$("#pbar").attr("value", ++inx);
 }
 
