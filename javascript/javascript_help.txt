@@ -1,0 +1,92 @@
+<자바스크립트 명령어>
+자바스크립트는 자료형을 쓰지않고 변수선언이 가능함
+ex)
+i=10
+s=한글
+<script language=javascript> </script> //이사이에 자바스크립트 명령어들사용
+function 메서드명{} //사용자정의 메서드를 만든다
+document.write() //화면에 메세지를 출력한다 (system.out.print기능)
+document.write("<br>") //한줄 내린다
+document.write("&nbsp") // 일정칸띄운다
+prompt("메세지","기본값") // 입력창을 띄운다
+alert()  // 알림창을 띄운다
+confirm() //확인 취소창 (확인은 true,취소는 false반환)
+<input type=button value=함수호출 onclick=aa()> // 버튼을 클릭하면 aa()함수를 호출한다
+i=parseInt(변수)//문자열을 정수로 정수로변환
+OnClick  // 마우스 클릭했을때
+OnMouseOver //마우스가 올라왔을때
+OnMouseOut // 마우스가 나갔을때
+OnLoad  //페이지 시작시 실행한다 body에만 사용가능
+ex)<body OnLoad=메서드명>
+OnUnload // 페이지에서 나갔을때 body에만 사용가능
+ex)
+<body OnUnload=메서드명>
+OnChange //값을 변경했을때
+OnBlur  // 커서제거시 실행 (focus를 잃었을때)
+OnFocus // 커서가 있을시 focus가 들어가면실행
+document.myform.pwd.value=""; //myform의 pwd에 내용삭제
+document.myform.pwd.focus(); //myform의 pwd에 포커스를 맞춘다
+*******************************************************************
+<form name=myform>
+ <select name=job>
+  <option selected>직업선택
+   <option value=학생>학생
+   <option value=회사원>회사원
+   <option value=자영업>자영업
+   <option value=백수>백수
+   <option value=프로그래머>프로그래머
+   <option value=주부>주부
+   <option value=기타>기타
+ </select>
+ 
+document.myform.job.options[i].text //i번째 text를 반환
+document.myform.job.options[i].text.value //i값을얻는다
+document.myform.job.options[i].text.selected //i선택돼었는가
+document.myform.job.options.selectedIndex //선택한 위치를 얻는다
+document.myform.job.options.length  //option배열 길이갯수반환
+********************************************************************
+스크립트의 배열
+Sum=new Array(100,”kim”,188,9) 형에상관없이 하나의배열에 정수 실수 문자 모두가능
+window.open("열릴주소이름or파일이름","새창이름","속성"); //새창을연다
+속성의종류 
+menubar=yes  //메뉴바
+scrollbars=yes  //스크롤바
+resizable=yes  //창크기재설정
+toolbar=yes  //툴바
+status=yes //상태바
+width=600  //폭
+height=600 //높이
+window.close();//창닫기
+<a href=javascript:window.close()>닫기</a> //창닫기
+<a href=javascript:self.close()>닫기</a> //창닫기
+today=new Date(); //시스템날짜구하기
+ 
+getYear()  //년도
+ 
+getMonth() //월(0~11월이므로 표기시 +1)
+ 
+getDate() //일
+ 
+getDay()  //요일(일요일0 월1 토6)
+ 
+getHours()  //시간
+ 
+getMinutes() //분
+ 
+getSeconds()  //초
+window.status= //윈도우상태창설정
+setTime(명령어,밀리초); //1초후에 명령어실행
+setInterval(명령어,밀리초); //1초마다 명령어실행
+location.replace(url);  // 지정 url로 대체(back)안됨
+location.herf="url"  // back 가능
+location.reload() // 새로고침
+
+
+---------------------------------------
+추가
+
+var str = "test,123,test333".split(","); // ,단위로 나누어 배열저장
+var str = "niee@naver.com".indexOf("@") //@의 문자열위치반환
+var str = "niee@naver.com".substr(start,end); //start~end위치의 문자열반환첫문자의 위치는0번
+var num = "123123123".replace("1","ee"); //1이라는 숫자가나오면 ee로변환 첫번째탐색되는1만해당
+var num = "123123123".replace(new RegExp("1","g"),"ee"); //모든1을 ee로변환

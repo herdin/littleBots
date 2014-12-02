@@ -1,0 +1,67 @@
+﻿
+<h2 class='title'>Category</h2>
+<div class='widget-content'>
+<style type="text/css">
+	.categoryl1{list-style-type: disc; }
+	.categoryl2{list-style-type: circle; list-style-position:inside;}
+</style>
+<div id='category' class='g1s' style="padding-left:20px;">
+    <ul>
+		<li class='categoryl1'>
+				<a id='category-tip' href='http://creatorhong.blogspot.com/search/label/tip?max-results=1'><b>Tip</b></a><ul>
+			<li class='categoryl2'>
+				<a id='category-blog' href='http://creatorhong.blogspot.com/search/label/blogspot?max-results=1'>Blogspot</a></li>
+			<li class='categoryl2'>
+				<a id='category-gp' href='http://creatorhong.blogspot.com/search/label/google%20%2b?max-results=1'>Google +</a></li>
+			<li class='categoryl2'>
+				<a id='category-plan' href='http://creatorhong.blogspot.com/search/label/plan?max-results=1'>Plan</a></li>
+		</ul></li>
+		<li class='categoryl1'>
+				<a id='category-study' href='http://creatorhong.blogspot.com/search/label/study?max-results=1'><b>Study</b></a><ul>
+            <li class='categoryl2'>
+                 <a id='category-api' href='http://creatorhong.blogspot.com/search/label/open api?max-results=1'>Open Api</a></li>
+			<li class='categoryl2'>
+				<a id='category-euler' href='http://creatorhong.blogspot.com/search/label/project%20euler?max-results=1'>Project Euler</a></li>
+			<li class='categoryl2'>
+				<a id='category-algospot' href='http://creatorhong.blogspot.com/search/label/algospot?max-results=1'>Algospot</a></li>
+
+		</ul></li>
+		<li class='categoryl1'>
+				<a id='category-life' href='http://creatorhong.blogspot.com/search/label/일상?max-results=1'><b>일상</b></a><ul>
+			<li class='categoryl2'>
+				<a id='category-trip' href='http://creatorhong.blogspot.com/search/label/여행?max-results=1'>여행</a></li>
+			<li class='categoryl2'>
+				<a id='category-chat' href='http://creatorhong.blogspot.com/search/label/잡담?max-results=1'>잡담</a></li>
+		</ul></li>
+	</ul>
+</div>
+<script>
+	function Category(id, label, name){
+		this.a = document.getElementById(id);
+		this.label = label;
+
+		var script = document.createElement('script');
+		script.type = 'text/javascript';
+		script.charset = 'utf-8';
+		script.src = home + '/feeds/posts/summary/-/' + label + '?max-results=1&alt=json-in-script&callback=' + name +'.pong';
+		document.getElementsByTagName('head')[0].appendChild(script);
+		
+		this.pong = function(cfeed){
+			var cnt = cfeed.feed.openSearch$totalResults.$t;
+			this.a.innerHTML = this.a.innerHTML + '(' + cnt + ')';
+		};
+	}
+	
+	var home = 'http://creatorhong.blogspot.com';
+	var tip = new Category('category-tip','tip','tip');
+	var blogspot = new Category('category-blog','blogspot', 'blogspot');
+	var gp = new Category('category-gp', 'google%20%2B', 'gp');
+	var plan = new Category('category-plan','plan','plan');
+	var study = new Category('category-study', 'study', 'study');
+	var api = new Category('category-api', 'open api', 'api');
+	var euler = new Category('category-euler', 'project euler', 'euler');
+	var algospot = new Category('category-algospot','algospot','algospot');
+	var life = new Category('category-life', '일상', 'life');
+	var chat = new Category('category-chat','잡담','chat');	
+	var trip = new Category('category-trip','여행','trip');
+</script>

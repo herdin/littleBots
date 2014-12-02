@@ -1,0 +1,81 @@
+﻿<style type="text/css">
+.category0{
+  //border:1px solid;
+  //border-color:#ebebeb;
+  //padding:10px;
+  //width:100px
+}
+.category1 a, .category2 a{
+  font-family: 'Nanum Gothic', sans-serif;
+  color:black;}
+</style>
+
+<div class='category0'>
+<ul>
+  <li class='category1'><a id='category_all' href='/'>all</a></li>
+  <!-- <li class='category1'><a id='category_test' href='/search/label/test'>test</a></li> -->
+  <li class='category1'><a id='category_pain' href='/search/label/pain'>pain</a></li>
+  <li class='category1'><a id='category_groan' href='/search/label/groan'>groan</a></li>
+  <li class='category1'><a id='category_agony' href='/search/label/agony'>agony</a></li>
+	<li class='category1'><a id='category_memory' href='/search/label/memory'>memory</a>
+		<ul>
+			<li class='category2'><a id='category_comput' href='/search/label/comput'>comput</a></li>
+			<li class='category2'><a id='category_data' href='/search/label/data'>data</a></li>
+			<li class='category2'><a id='category_cuisine' href='/search/label/cuisine'>cuisine</a></li>
+			<li class='category2'><a id='category_trace' href='/search/label/trace'>trace</a></li>
+		</ul>
+	</li>
+	<li class='category1'><a id='category_ccp' href='/search/label/ccp'>ccp</a></li>
+	<li class='category1'><a id='category_origin' href='/search/label/origin'>origin</a></li>
+	<li class='category1'><a id='category_blizzard' href='/search/label/blizzard'>blizzard</a></li>
+	<li class='category1'><a id='category_xl' href='/search/label/xl'>xl</a></li>
+	<li class='category1'><a id='category_indie' href='/search/label/indie'>indie</a></li>
+	<li class='category1'><a id='category_organism' href='/search/label/organism'>organism</a></li>
+	<!-- <li><a id='category_' href='/search/label/'></a></li> -->
+  <!-- <li><a id='' href=''></a></li> -->
+</ul>
+</div>
+<script>  
+ function Category(id, label, name){  
+  this.a = document.getElementById(id);  
+  this.label = label;  
+  
+  var script = document.createElement('script');  
+  script.type = 'text/javascript';  
+  script.charset = 'utf-8';
+  if(label == '')
+  	script.src = home + '/feeds/posts/summary/?max-results=1&alt=json-in-script&callback=' + name +'.pong'; 
+  else
+  script.src = home + '/feeds/posts/summary/-/' + label + '?max-results=1&alt=json-in-script&callback=' + name +'.pong';  
+  document.getElementsByTagName('head')[0].appendChild(script);  
+    
+  this.pong = function(cfeed){  
+   var cnt = cfeed.feed.openSearch$totalResults.$t;  
+   this.a.innerHTML = this.a.innerHTML + '(' + cnt + ')';  
+  };  
+ }  
+   
+ var home = 'http://herdin86.blogspot.kr';
+ 
+ //var tip = new Category('category-tip','tip','tip');
+ var gall = new Category('category_all', '', 'gall');
+ //var gtest = new Category('category_test', 'test', 'gtest'); 
+ var gpain = new Category('category_pain', 'pain', 'gpain');
+ var ggroan = new Category('category_groan', 'groan', 'ggroan');
+ var gagony = new Category('category_agony', 'agony', 'gagony');
+ var gmemory = new Category('category_memory', 'memory', 'gmemory');
+ var gcomput = new Category('category_comput', 'comput', 'gcomput');
+ var gdata = new Category('category_data', 'data', 'gdata');
+ var gcuisine = new Category('category_cuisine', 'cuisine', 'gcuisine');
+ var gtrace = new Category('category_trace', 'trace', 'gtrace');
+ var gccp = new Category('category_ccp', 'ccp', 'gccp');
+ var gorigin = new Category('category_origin', 'origin', 'gorigin');
+ var gblizzard = new Category('category_blizzard', 'blizzard', 'gblizzard');
+ var gxl = new Category('category_xl', 'xl', 'gxl');
+ var gindie = new Category('category_indie', 'indie', 'gindie');
+ var gorganism = new Category('category_organism', 'organism', 'gorganism');
+ 
+// var = new Category(
+// style='color:black'
+//'Trebuchet MS'
+</script>
