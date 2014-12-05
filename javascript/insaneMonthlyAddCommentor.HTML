@@ -1,9 +1,23 @@
 <!doctype html>
 <meta charset="utf-8">
 <html>
-<head>
-<!--<META content="text/html; charset=utf-8" http-equiv=Content-Type>
- <META name=GENERATOR content="TAGFREE Active Designer"> -->
+<head><title></title>
+<!-- SEARCH FOR MORE GOOGLE FONT! -->
+<link href='http://fonts.googleapis.com/css?family=Shadows+Into+Light' rel='stylesheet' type='text/css'>
+<link href='http://fonts.googleapis.com/css?family=Audiowide' rel='stylesheet' type='text/css'>
+<link href='http://fonts.googleapis.com/css?family=Bangers' rel='stylesheet' type='text/css'>
+<style type="text/css">
+	@import url(http://fonts.googleapis.com/earlyaccess/nanumgothic.css);
+	body, button, div, input, textarea, pre, select{
+		font-size : 12px;
+		font-family:	'Nanum Gothic';
+		font-backup:	'Audiowide',
+									'Shadows Into Light',
+									'Bangers',
+									cursive;
+									
+	}
+</style>
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
 <script type=text/javascript>
 //GLOBAL VARIABLE
@@ -17,58 +31,45 @@ var contents = "&contents=";
 
 var ERROR_PROGRAM_UNKNOWN = "invalid program exit status.";
 var ERROR_NOT_SUPPORT_FILE_TYPE = "invalid file type.";
+var ERROR_INVALID_FILE_CONTENTS = "invalid file contents.\nfile contents must be like below..\n00000 EMP_NAME CONTENTS1 CONTENTS2";
 
 var workingWindow;
 
 var arr_Number = new Array();
 var arr_Name = new Array();
 var arr_Contents = new Array();
+
 /*
-arrNum[0]  = "69439"; arrNm[0] = "KIWAN PARK";
-arrNum[1]  = "52115"; arrNm[1] = "WOOGA XON";
-arrNum[2]  = "73211"; arrNm[2] = "LIM KYU TAE";
-arrNum[3]  = "71644"; arrNm[3] = "JongChun Kim";
-arrNum[4]  = "72302"; arrNm[4] = "Yongha Jin";
-arrNum[5]  = "75232"; arrNm[5] = "Seongyup Kim";
-arrNum[6]  = "73522"; arrNm[6] = "Jiyoung Nam";
-arrNum[7]  = "76980"; arrNm[7] = "TAESUNG SUK";
-arrNum[8]  = "76105"; arrNm[8] = "Sang Geun Lee";
-arrNum[9]  = "77338"; arrNm[9] = "SONGEE KIM";
-arrNum[10] = "75451"; arrNm[10] = "Ye Jin Kim";
-arrNum[11] = "75442"; arrNm[11] = "June Hyouk Kim";
-arrNum[12] = "74956"; arrNm[12] = "Hakkeun Kim";
-arrNum[13] = "74942"; arrNm[13] = "Joohee Moon";
-arrNum[14] = "77339"; arrNm[14] = "Jinhwa Park";
-arrNum[15] = "75978"; arrNm[15] = "JONGMIN BAEK";
-arrNum[16] = "72918"; arrNm[16] = "Kyungtae Lee";
-arrNum[17] = "78624"; arrNm[17] = "Doe Eon KIM";
-arrNum[18] = "76764"; arrNm[18] = "Se Wook Kim";
-arrNum[19] = "76912"; arrNm[19] = "Leekyung Kim";
-arrNum[20] = "78575"; arrNm[20] = "Jingoo Kim";
-arrNum[21] = "78626"; arrNm[21] = "chansik kim";
-arrNum[22] = "76705"; arrNm[22] = "Hyun Ku Bae";
-arrNum[23] = "76975"; arrNm[23] = "GAIM YANG";
-arrNum[24] = "76847"; arrNm[24] = "Eunji Yang";
-arrNum[25] = "78625"; arrNm[25] = "Yang jaeseok";
-arrNum[26] = "76702"; arrNm[26] = "SEURGI IM";
-arrNum[27] = "76811"; arrNm[27] = "SoonMin Jang";
-arrNum[28] = "77331"; arrNm[28] = "Changwan Choi";
-arrNum[29] = "77340"; arrNm[29] = "SeongHo Han";
+arr_Number[0]  = "사원사번1"; arr_Name[0] = "사원이름1"; arr_Contents[0] = "댓글내용1"; 
+arr_Number[1]  = "사원사번2"; arr_Name[1] = "사원이름2"; arr_Contents[0] = "댓글내용2";
+arr_Number[2]  = "사원사번3"; arr_Name[2] = "사원이름3"; arr_Contents[0] = "댓글내용3";
 */
 
+///////////////////////////////////
+/////////////////////DOCUMENT READY
+///////////////////////////////////
 $(document).ready(function() {
-	$("#version").html(Date());
+	//VERSION SETTING
+	var currentTime = new Date();
+	$("#version").val(
+		"VERSION : " +
+		currentTime.getFullYear() + "/" + currentTime.getMonth() + "/" + currentTime.getDate() + " " +
+		currentTime.getHours() + ":" + currentTime.getMinutes() + ":" + currentTime.getSeconds()
+	);
 
+	//START OF saveTime CLICK EVENT
 	$("#saveTime").click(function() {
 		if(addCommentor_init()) {
 			addCommentor_start();
 		} else {
 			alert(ERROR_PROGRAM_UNKNOWN);
 		}
-	});//END OF saveTime CLICK EVENT
+	});
+	//END OF saveTime CLICK EVENT
 
 	var fileInput = $("#fileInput").get(0);//document.getElementById("fileInput");
 	
+	//START OF FILE INPUT EVENT
 	fileInput.addEventListener("change",
 		function(e) {
 			fileContent = "";
@@ -83,11 +84,20 @@ $(document).ready(function() {
 			} else {
 				alert(ERROR_NOT_SUPPORT_FILE_TYPE);
 			}//END OF IF/ELSE
-		});
-		//END OF EVENT LISTENER
+	});
+	//END OF EVENT LISTENER
+	
+	$("#fileformat").click(function(){
+		var formatEx =	"74737 김수한 안녕하세요 김부장님\n" +
+										"73728 박무한 안녕하십니까 박부장님!";
+		alert(formatEx);
+	});//END OF CLICK
 
 });//END OF READY
 
+///////////////////////////////////
+/////////////////ADD COMMENTOR INIT
+///////////////////////////////////
 function addCommentor_init() {
 	var i = 0; var j = 0;
 	
@@ -108,10 +118,17 @@ function addCommentor_init() {
 		for(j=0; j<words.length; j++) {
 			//console.log(words[j]);
 			if(j == 0) {
+				//EMP NUMBER
+				if(words[j].length != 5) {
+					alert(ERROR_INVALID_FILE_CONTENTS + "\n" + i + " line, " + j + " th words." );
+					return false;
+				}
 				arr_Number[i] = words[j]; 
 			} else if(j == 1) {
+				//EMP NAME
 				arr_Name[i] = words[j];
 			} else {
+				//CONTENTS
 				arr_Contents[i] += words[j] + " ";
 			}
 		}//END OF INNER FORLOOP
@@ -125,6 +142,9 @@ function addCommentor_init() {
 var intervalf;
 var inx;
 
+///////////////////////////////////
+////////////////ADD COMMENTOR START
+///////////////////////////////////
 function addCommentor_start() {
 	$("#chk").html("0/"+arr_Number.length);
 	$("#pbar").attr("max", arr_Number.length);
@@ -132,6 +152,9 @@ function addCommentor_start() {
 	intervalf = setInterval(function(){ addCommentor_processing(); }, 2000);
 }
 
+///////////////////////////////////
+///////////ADD COMMENTOR PROCESSING
+///////////////////////////////////
 function addCommentor_processing() {
 	if(inx == arr_Number.length) {
 		jangHelper_end();
@@ -152,7 +175,7 @@ function addCommentor_processing() {
 	document.body.appendChild(newA);
 	document.body.appendChild(document.createElement("br"));
 	
-	//console.log("inx[" + inx + "] : target emp name[" + arr_Name[inx] + "] : contents length[" + arr_Contents[inx].length + "] : contents[" + arr_Contents[inx] + "] : url : " + newA.href);
+	console.log("inx[" + inx + "] : target emp name[" + arr_Name[inx] + "] : contents length[" + arr_Contents[inx].length + "] : contents[" + arr_Contents[inx] + "] : url : " + newA.href);
 	if(arr_Contents[inx].length > 0) {
 		newA.click();
 	}
@@ -160,6 +183,9 @@ function addCommentor_processing() {
 	$("#pbar").attr("value", ++inx);
 }
 
+///////////////////////////////////
+//////////////////ADD COMMENTOR END
+///////////////////////////////////
 function jangHelper_end() {
 	window.clearInterval(intervalf);
 	workingWindow.close();
@@ -167,15 +193,20 @@ function jangHelper_end() {
 
 </script>
 </head>
+
 <body>
-	
-<div id="version"></div><br><br>
 
-	<input type="file" id="fileInput"><br><br>
-	<input type="button" id="saveTime" value="saveTime" style="background:white; border:1px solid #ddd;"/>
-	<progress 					 id="pbar" value="0" max="100"></progress>
-	<div id="chk"></div>
+<br><img src="https://cdn4.iconfinder.com/data/icons/dortmund/Dortmund-32x32/full-time.png" style="height:9px;">
+<b>usage</b> : input config text file, and push "save time" button. that's all. config file format like this.
+<img id="fileformat" src="https://cdn4.iconfinder.com/data/icons/dortmund/Dortmund-32x32/sign-out.png" style="height:9px;">
+<br><img src="https://cdn4.iconfinder.com/data/icons/dortmund/Dortmund-32x32/email.png" style="height:9px;">
+<b>feedback</b> : herdin86@gmail.com : <input id="version" style="border:0px;" size="35"/>
 
+<br><br><input type="file" id="fileInput">
+
+<br><br><input type="button" id="saveTime" value="saveTime" style="background:white; border:1px solid #ddd;"/>
+<progress 					 id="pbar" value="0" max="100"></progress>
+<div id="chk"></div>
 
 <div style="visibility:hidden;">
 	<textarea id="fileContent"></textarea>
