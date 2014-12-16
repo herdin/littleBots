@@ -371,6 +371,7 @@ function navvyProcess() {
 	
 	var MESSAGE_ID = "MA401";
 	var BODY_SIZE = 0;
+	
 	var TYPE_TXT = "TXT";
 	var TYPE_INT = "INT";
 	var TYPE_BCD = "BCD";
@@ -401,6 +402,7 @@ function navvyProcess() {
 	var j = 0;
 	
 	//VALIDATE INPUT DATA LENGTH//
+	//XML TAG, TYPE, LENGTH
 	if(arrLine.length%3 != 0) {
 		console.log(arrLine.length);
 		alert(ERR_ELEMENT_LENGTH);
