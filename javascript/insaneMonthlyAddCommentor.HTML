@@ -155,12 +155,17 @@ function addCommentor_start() {
 ///////////////////////////////////
 ///////////ADD COMMENTOR PROCESSING
 ///////////////////////////////////
+var default_Content = "^^;;";
 function addCommentor_processing() {
 	if(inx == arr_Number.length) {
 		jangHelper_end();
 		return;
 	}
 	$("#chk").html("" + (inx+1) + "/" + arr_Number.length);
+
+	if(arr_Contents[inx].length > 0) {
+		default_Content = arr_Contents[inx];
+	}
 	
 	var newA = document.createElement("a");
 	newA.id = arr_Number[inx];
@@ -169,16 +174,15 @@ function addCommentor_processing() {
 							targetEmpNum + arr_Number[inx] +
 							userEmpNum + arr_Number[inx] +		//it means userEmpNumber but it doesn't work.. useless maybe(1)
 							replyOwnrId + arr_Number[inx] +		//it means userEmpNumber but it doesn't work.. useless maybe(2)
-							contents + arr_Contents[inx];
+							contents + default_Content;
 	newA.style.visibility = "hidden";
 	newA.target = "workingWindow";
 	document.body.appendChild(newA);
 	document.body.appendChild(document.createElement("br"));
 	
 	console.log("inx[" + inx + "] : target emp name[" + arr_Name[inx] + "] : contents length[" + arr_Contents[inx].length + "] : contents[" + arr_Contents[inx] + "] : url : " + newA.href);
-	if(arr_Contents[inx].length > 0) {
-		newA.click();
-	}
+
+	newA.click();
 	
 	$("#pbar").attr("value", ++inx);
 }

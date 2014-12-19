@@ -152,7 +152,8 @@ public class JangHelper extends JFrame{
 			//74053 EmpName1
 			//74054 EmpName2
 			try {
-				reader = new BufferedReader(new FileReader("jangHelper_config.txt"));
+				reader = new BufferedReader(
+							new InputStreamReader(new FileInputStream("jangHelper_config.txt"), "UTF-8"));
 				
 			} catch (FileNotFoundException e) {
 				println("catch FileNotFoundException[1] : config file not found. : " + e.getStackTrace());
@@ -223,7 +224,7 @@ public class JangHelper extends JFrame{
 				SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 				Date writtenDate = null;
 				//Date nowDate = new Date();
-				Date nowDate = dateFormat.parse("2014-12-13 10:33:56");
+				Date nowDate = dateFormat.parse("2014-01-13 10:33:56");
 				
 				try {
 					

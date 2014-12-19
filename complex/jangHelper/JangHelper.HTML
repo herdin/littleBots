@@ -107,9 +107,9 @@ function jangHelper_init() {
 var intervalf;
 var inx;
 function jangHelper_start() {
-	$("#chk").html("");
+	$("#chk").html("0/"+arrNum.length);
 	$("#pbar").attr("max", arrNum.length);
-	intervalf = setInterval(function(){ jangHelper_processing(); }, 1000);
+	intervalf = setInterval(function(){ jangHelper_processing(); }, 2000);
 	inx = 0;
 }
 
@@ -118,6 +118,7 @@ function jangHelper_processing() {
 		jangHelper_end();
 		return;
 	}
+	$("#chk").html("" + (inx+1) + "/" + arrNum.length);
 	
 	var newA = document.createElement("a");
 	newA.id = arrNum[inx];
