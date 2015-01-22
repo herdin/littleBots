@@ -223,8 +223,8 @@ public class JangHelper extends JFrame{
 				contacList = new ArrayList<String>();
 				SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 				Date writtenDate = null;
-				//Date nowDate = new Date();
-				Date nowDate = dateFormat.parse("2014-01-13 10:33:56");
+				Date nowDate = new Date();
+//				Date nowDate = dateFormat.parse("2014-01-13 10:33:56");
 				
 				try {
 					
@@ -257,7 +257,7 @@ public class JangHelper extends JFrame{
 							if(writtenMonth == exceptLimitMonth) {
 								//no need to exam past month
 								break;
-							} else if(writtenMonth == measureMonth) {
+							} else if(writtenMonth == measureMonth) { //일단 다넣음.
 								contacList.add(contacEmpName);
 							}
 							
@@ -286,11 +286,11 @@ public class JangHelper extends JFrame{
 				}
 				
 				//START OF FOR-LOOP : check contact list
-				for(int i=0; i<contacList.size(); i++) {
+				for(int i=0; i<contacList.size(); i++) {	//연락한놈들만큼 반복
 					String contacNm = contacList.get(i);
-					for(int j=0; j<empNmList.size(); j++) {
-						if(empNmList.get(j).equals(contacNm)) {
-							insaneChkList[j][fileIndex] = 1;
+					for(int j=0; j<empNmList.size(); j++) {		//config파일에 적혀있는 팀원만큼 반복
+						if(empNmList.get(j).equals(contacNm)) {		//config파일에 적혀있는 팀원이면,
+							insaneChkList[j][fileIndex] = 1;		//[팀원순서][파일주인순서] 행렬에 마킹함.
 							break;
 						}
 					}

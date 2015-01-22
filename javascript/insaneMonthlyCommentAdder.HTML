@@ -31,7 +31,7 @@ var contents = "&contents=";
 
 var ERROR_PROGRAM_UNKNOWN = "invalid program exit status.";
 var ERROR_NOT_SUPPORT_FILE_TYPE = "invalid file type.";
-var ERROR_INVALID_FILE_CONTENTS = "invalid file contents.\nfile contents must be like below..\n00000 EMP_NAME CONTENTS1 CONTENTS2";
+var ERROR_INVALID_FILE_CONTENTS = "invalid file contents.\nfile contents must be like below..\n00000 EMP_NAME CONTENTS1 CONTENTS2\n00000 EMP_NAME CONTENTS1 CONTENTS2";
 
 var workingWindow;
 
@@ -105,20 +105,34 @@ function addCommentor_init() {
 	if(fileContent.length == 0)
 		return false;
 		
-	var pattern_line = /[\wㄱ-힣.,;:\'\"\[{\]}\|`~!@#$%^&*()-_=+ ]+/g;
-	var pattern_innerLine = /[\wㄱ-힣.,;:\'\"\[{\]}\|`~!@#$%^&*()-_=+]+/g;
+	//var pattern_line = /[\wㄱ-힣.,;:\'\"\[{\]}\|`~!@#$%^&*()-_=+ ]+/g;
+	var pattern_line = /^.*$/mg;
+	//var pattern_exceptSpace = /[\wㄱ-힣.,;:\'\"\[{\]}\|`~!@#$%^&*()-_=+]+/g;
+	var pattern_exceptSpace = /[^ ]+/g;
 	var lines = fileContent.match(pattern_line);
-
-	//console.log("fileContent : " +fileContent);
+	
+	//START OF DEBUG
+	/*
+	for(i=0; i<lines.length; i++) {
+		console.log(lines[i]);
+		var words = lines[i].match(pattern_exceptSpace);
+		for(j=0; j<words.length; j++) {
+			console.log("\t" + words[j]);
+		}
+	}
+	return false;
+	*/
+	//END OF DEBUG
+	
 	for(i=0; i<lines.length; i++) {
 		
-		var words = lines[i].match(pattern_innerLine);
+		var words = lines[i].match(pattern_exceptSpace);
 		arr_Contents[i] = "";
 		
 		for(j=0; j<words.length; j++) {
 			//console.log(words[j]);
 			if(j == 0) {
-				//EMP NUMBER
+				//EMP NUMBER LENGTH != 5 THAN EXCEPTION
 				if(words[j].length != 5) {
 					alert(ERROR_INVALID_FILE_CONTENTS + "\n" + i + " line, " + j + " th words." );
 					return false;
@@ -132,12 +146,30 @@ function addCommentor_init() {
 				arr_Contents[i] += words[j] + " ";
 			}
 		}//END OF INNER FORLOOP
+		
+		//START OF DETOUR LOGIC FOR GET METHOD
+		arr_Contents[i] = arr_Contents[i].replace(/ /g, "%20");
+		arr_Contents[i] = arr_Contents[i].replace(/\&/g, "%26");
+		arr_Contents[i] = arr_Contents[i].replace(/\+/g, "%2B");
+		arr_Contents[i] = arr_Contents[i].replace(/\#/g, "%23");
+		//END OF DETOUR LOGIC FOR GET METHOD
+		
 	}//END OF OUTER FORLOOP
 	
 	workingWindow = window.open("", "workingWindow");
 	
+	//START OF DEBUG
+	var debug = 0;
+	if(debug == 1) {
+		for(i=0; i<arr_Contents.length; i++) {
+			console.log(arr_Contents[i]);
+		}
+		return false;
+	}
+	//END OF DEBUG
+	
 	return true;
-}
+}//END OF addCommentor_init()
 
 var intervalf;
 var inx;
@@ -150,12 +182,12 @@ function addCommentor_start() {
 	$("#pbar").attr("max", arr_Number.length);
 	inx = 0;
 	intervalf = setInterval(function(){ addCommentor_processing(); }, 2000);
-}
+}//END OF addCommentor_start()
 
 ///////////////////////////////////
 ///////////ADD COMMENTOR PROCESSING
 ///////////////////////////////////
-var default_Content = "^^;;";
+var default_Content = "^^;";
 function addCommentor_processing() {
 	if(inx == arr_Number.length) {
 		jangHelper_end();
@@ -185,7 +217,7 @@ function addCommentor_processing() {
 	newA.click();
 	
 	$("#pbar").attr("value", ++inx);
-}
+}//END OF addCommentor_processing()
 
 ///////////////////////////////////
 //////////////////ADD COMMENTOR END
@@ -193,7 +225,7 @@ function addCommentor_processing() {
 function jangHelper_end() {
 	window.clearInterval(intervalf);
 	workingWindow.close();
-}
+}//END OF jangHelper_end()
 
 </script>
 </head>
