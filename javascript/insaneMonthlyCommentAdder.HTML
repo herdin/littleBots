@@ -3,26 +3,26 @@
 <html>
 <head><title></title>
 <!-- SEARCH FOR MORE GOOGLE FONT! -->
-<link href='http://fonts.googleapis.com/css?family=Shadows+Into+Light' rel='stylesheet' type='text/css'>
 <link href='http://fonts.googleapis.com/css?family=Audiowide' rel='stylesheet' type='text/css'>
+<link href='http://fonts.googleapis.com/css?family=Shadows+Into+Light' rel='stylesheet' type='text/css'>
 <link href='http://fonts.googleapis.com/css?family=Bangers' rel='stylesheet' type='text/css'>
 <style type="text/css">
 	@import url(http://fonts.googleapis.com/earlyaccess/nanumgothic.css);
 	body, button, div, input, textarea, pre, select{
 		font-size : 12px;
-		font-family:	'Nanum Gothic';
+		font-family:	'Nanum Gothic' , '굴림';
 		font-backup:	'Audiowide',
 									'Shadows Into Light',
 									'Bangers',
 									cursive;
-									
 	}
 </style>
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
 <script type=text/javascript>
 //GLOBAL VARIABLE
+var DEBUG = true;
+var VER = "1.0";
 var fileContent = "";
-var testUrl = "http://gofficeplus.lgcns.com/MbMain.do?method=addHappy&type=H&sysTypeCd=BL&publicFg=Y&docId=76811&blogEmpNo=76705&replyOwnrId=76705&contents=test";
 var strUrl = "http://gofficeplus.lgcns.com/MbMain.do?method=addHappy&type=H&sysTypeCd=BL&publicFg=Y";
 var targetEmpNum = "&docId=";
 var userEmpNum = "&blogEmpNo=";
@@ -50,12 +50,7 @@ arr_Number[2]  = "사원사번3"; arr_Name[2] = "사원이름3"; arr_Contents[0]
 ///////////////////////////////////
 $(document).ready(function() {
 	//VERSION SETTING
-	var currentTime = new Date();
-	$("#version").val(
-		"VERSION : " +
-		currentTime.getFullYear() + "/" + currentTime.getMonth() + "/" + currentTime.getDate() + " " +
-		currentTime.getHours() + ":" + currentTime.getMinutes() + ":" + currentTime.getSeconds()
-	);
+	$("#version").html( $("#version").html() + VER);
 
 	//START OF saveTime CLICK EVENT
 	$("#saveTime").click(function() {
@@ -157,17 +152,7 @@ function addCommentor_init() {
 	}//END OF OUTER FORLOOP
 	
 	workingWindow = window.open("", "workingWindow");
-	
-	//START OF DEBUG
-	var debug = 0;
-	if(debug == 1) {
-		for(i=0; i<arr_Contents.length; i++) {
-			console.log(arr_Contents[i]);
-		}
-		return false;
-	}
-	//END OF DEBUG
-	
+		
 	return true;
 }//END OF addCommentor_init()
 
@@ -235,12 +220,16 @@ function jangHelper_end() {
 <br><img src="https://cdn4.iconfinder.com/data/icons/dortmund/Dortmund-32x32/full-time.png" style="height:9px;">
 <b>usage</b> : input config text file, and push "save time" button. that's all. config file format like this.
 <img id="fileformat" src="https://cdn4.iconfinder.com/data/icons/dortmund/Dortmund-32x32/sign-out.png" style="height:9px;">
+
 <br><img src="https://cdn4.iconfinder.com/data/icons/dortmund/Dortmund-32x32/email.png" style="height:9px;">
-<b>feedback</b> : herdin86@gmail.com : <input id="version" style="border:0px;" size="35"/>
+<b>feedback</b> : herdin86@gmail.com
+
+<br><img src="https://cdn4.iconfinder.com/data/icons/dortmund/Dortmund-32x32/check.png" style="height:9px;">
+<b>version</b> : <span id="version"></span>
 
 <br><br><input type="file" id="fileInput">
 
-<br><br><input type="button" id="saveTime" value="saveTime" style="background:white; border:1px solid #ddd;"/>
+<br><br><input type="button" id="saveTime" value="save time" style="background:white; border:1px solid #ddd;"/>
 <progress 					 id="pbar" value="0" max="100"></progress>
 <div id="chk"></div>
 
