@@ -3,26 +3,31 @@
 <html>
 <head><title></title>
 <!-- SEARCH FOR MORE GOOGLE FONT! -->
-<link href='http://fonts.googleapis.com/css?family=Shadows+Into+Light' rel='stylesheet' type='text/css'>
 <link href='http://fonts.googleapis.com/css?family=Audiowide' rel='stylesheet' type='text/css'>
+<link href='http://fonts.googleapis.com/css?family=Shadows+Into+Light' rel='stylesheet' type='text/css'>
 <link href='http://fonts.googleapis.com/css?family=Bangers' rel='stylesheet' type='text/css'>
 <style type="text/css">
 	@import url(http://fonts.googleapis.com/earlyaccess/nanumgothic.css);
 	body, button, div, input, textarea, pre, select{
 		font-size : 12px;
-		font-family:	'Nanum Gothic';
+		font-family:	'Nanum Gothic' , '굴림';
 		font-backup:	'Audiowide',
 									'Shadows Into Light',
 									'Bangers',
 									cursive;
-									
 	}
 </style>
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
 <script type=text/javascript>
 //GLOBAL VARIABLE
+var DEBUG = false;
+var VER = "1.2";
+/*
+ * VER 1.0 : FIRST RELEASE.
+ * VER 1.1 : ADD CCL.
+ * VER 1.2 : DEL CCL(FOR SIMPLICITY). ADD DEBUG(NOT SEND MODE).
+ */
 var fileContent = "";
-var testUrl = "http://gofficeplus.lgcns.com/MbMain.do?method=addHappy&type=H&sysTypeCd=BL&publicFg=Y&docId=76811&blogEmpNo=76705&replyOwnrId=76705&contents=test";
 var strUrl = "http://gofficeplus.lgcns.com/MbMain.do?method=addHappy&type=H&sysTypeCd=BL&publicFg=Y";
 var targetEmpNum = "&docId=";
 var userEmpNum = "&blogEmpNo=";
@@ -31,7 +36,7 @@ var contents = "&contents=";
 
 var ERROR_PROGRAM_UNKNOWN = "invalid program exit status.";
 var ERROR_NOT_SUPPORT_FILE_TYPE = "invalid file type.";
-var ERROR_INVALID_FILE_CONTENTS = "invalid file contents.\nfile contents must be like below..\n00000 EMP_NAME CONTENTS1 CONTENTS2";
+var ERROR_INVALID_FILE_CONTENTS = "invalid file contents.\nfile contents must be like below..\n00000 EMP_NAME CONTENTS1 CONTENTS2\n00000 EMP_NAME CONTENTS1 CONTENTS2";
 
 var workingWindow;
 
@@ -50,12 +55,7 @@ arr_Number[2]  = "사원사번3"; arr_Name[2] = "사원이름3"; arr_Contents[0]
 ///////////////////////////////////
 $(document).ready(function() {
 	//VERSION SETTING
-	var currentTime = new Date();
-	$("#version").val(
-		"VERSION : " +
-		currentTime.getFullYear() + "/" + currentTime.getMonth() + "/" + currentTime.getDate() + " " +
-		currentTime.getHours() + ":" + currentTime.getMinutes() + ":" + currentTime.getSeconds()
-	);
+	$("#version").html( $("#version").html() + VER);
 
 	//START OF saveTime CLICK EVENT
 	$("#saveTime").click(function() {
@@ -105,20 +105,21 @@ function addCommentor_init() {
 	if(fileContent.length == 0)
 		return false;
 		
-	var pattern_line = /[\wㄱ-힣.,;:\'\"\[{\]}\|`~!@#$%^&*()-_=+ ]+/g;
-	var pattern_innerLine = /[\wㄱ-힣.,;:\'\"\[{\]}\|`~!@#$%^&*()-_=+]+/g;
+	//var pattern_line = /[\wㄱ-힣.,;:\'\"\[{\]}\|`~!@#$%^&*()-_=+ ]+/g;
+	var pattern_line = /^.*$/mg;
+	//var pattern_exceptSpace = /[\wㄱ-힣.,;:\'\"\[{\]}\|`~!@#$%^&*()-_=+]+/g;
+	var pattern_exceptSpace = /[^ ]+/g;
 	var lines = fileContent.match(pattern_line);
-
-	//console.log("fileContent : " +fileContent);
+	
 	for(i=0; i<lines.length; i++) {
 		
-		var words = lines[i].match(pattern_innerLine);
+		var words = lines[i].match(pattern_exceptSpace);
 		arr_Contents[i] = "";
 		
 		for(j=0; j<words.length; j++) {
 			//console.log(words[j]);
 			if(j == 0) {
-				//EMP NUMBER
+				//EMP NUMBER LENGTH != 5 THAN EXCEPTION
 				if(words[j].length != 5) {
 					alert(ERROR_INVALID_FILE_CONTENTS + "\n" + i + " line, " + j + " th words." );
 					return false;
@@ -132,12 +133,20 @@ function addCommentor_init() {
 				arr_Contents[i] += words[j] + " ";
 			}
 		}//END OF INNER FORLOOP
+		
+		//START OF DETOUR LOGIC FOR GET METHOD
+		arr_Contents[i] = arr_Contents[i].replace(/ /g, "%20");
+		arr_Contents[i] = arr_Contents[i].replace(/\&/g, "%26");
+		arr_Contents[i] = arr_Contents[i].replace(/\+/g, "%2B");
+		arr_Contents[i] = arr_Contents[i].replace(/\#/g, "%23");
+		//END OF DETOUR LOGIC FOR GET METHOD
+		
 	}//END OF OUTER FORLOOP
 	
 	workingWindow = window.open("", "workingWindow");
-	
+		
 	return true;
-}
+}//END OF addCommentor_init()
 
 var intervalf;
 var inx;
@@ -150,15 +159,15 @@ function addCommentor_start() {
 	$("#pbar").attr("max", arr_Number.length);
 	inx = 0;
 	intervalf = setInterval(function(){ addCommentor_processing(); }, 2000);
-}
+}//END OF addCommentor_start()
 
 ///////////////////////////////////
 ///////////ADD COMMENTOR PROCESSING
 ///////////////////////////////////
-var default_Content = "^^;;";
+var default_Content = "^^;";
 function addCommentor_processing() {
 	if(inx == arr_Number.length) {
-		jangHelper_end();
+		addCommentor_end();
 		return;
 	}
 	$("#chk").html("" + (inx+1) + "/" + arr_Number.length);
@@ -180,20 +189,22 @@ function addCommentor_processing() {
 	document.body.appendChild(newA);
 	document.body.appendChild(document.createElement("br"));
 	
-	console.log("inx[" + inx + "] : target emp name[" + arr_Name[inx] + "] : contents length[" + arr_Contents[inx].length + "] : contents[" + arr_Contents[inx] + "] : url : " + newA.href);
+	console.log("inx[" + inx + "] : target emp name[" + arr_Name[inx] + "] : contents length[" + arr_Contents[inx].length + "] : contents[" + default_Content + "] : url : " + newA.href);
 
-	newA.click();
+	if(!DEBUG) {
+		newA.click();
+	}
 	
 	$("#pbar").attr("value", ++inx);
-}
+}//END OF addCommentor_processing()
 
 ///////////////////////////////////
 //////////////////ADD COMMENTOR END
 ///////////////////////////////////
-function jangHelper_end() {
+function addCommentor_end() {
 	window.clearInterval(intervalf);
 	workingWindow.close();
-}
+}//END OF addCommentor_end()
 
 </script>
 </head>
@@ -203,14 +214,19 @@ function jangHelper_end() {
 <br><img src="https://cdn4.iconfinder.com/data/icons/dortmund/Dortmund-32x32/full-time.png" style="height:9px;">
 <b>usage</b> : input config text file, and push "save time" button. that's all. config file format like this.
 <img id="fileformat" src="https://cdn4.iconfinder.com/data/icons/dortmund/Dortmund-32x32/sign-out.png" style="height:9px;">
+
 <br><img src="https://cdn4.iconfinder.com/data/icons/dortmund/Dortmund-32x32/email.png" style="height:9px;">
-<b>feedback</b> : herdin86@gmail.com : <input id="version" style="border:0px;" size="35"/>
+<b>feedback</b> : herdin86@gmail.com
+
+<br><img src="https://cdn4.iconfinder.com/data/icons/dortmund/Dortmund-32x32/check.png" style="height:9px;">
+<b>version</b> : <span id="version"></span>
 
 <br><br><input type="file" id="fileInput">
 
-<br><br><input type="button" id="saveTime" value="saveTime" style="background:white; border:1px solid #ddd;"/>
+<br><br><input type="button" id="saveTime" value="save time" style="background:white; border:1px solid #ddd;"/>
 <progress 					 id="pbar" value="0" max="100"></progress>
 <div id="chk"></div>
+
 
 <div style="visibility:hidden;">
 	<textarea id="fileContent"></textarea>
