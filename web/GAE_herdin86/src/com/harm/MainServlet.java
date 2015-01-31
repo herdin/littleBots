@@ -1,14 +1,18 @@
 package com.harm;
 
 import java.io.IOException;
-import javax.servlet.http.*;
+
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 @SuppressWarnings("serial")
 public class MainServlet extends HttpServlet {
 	public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-		herdinLogging hl = new herdinLogging(this);
-		hl.ENTER();
-
+//		Logger logger = Logger.getLogger(this.getClass().getSimpleName());
+//		logger.log(Level.INFO, this.getClass().getSimpleName() + "." + Thread.currentThread().getStackTrace()[1].getMethodName());
+		
+		
 //		System.out.println(req.getRequestURI());
 		
 		if(req.getRequestURI().contains("imca")) {
@@ -17,7 +21,6 @@ public class MainServlet extends HttpServlet {
 			resp.sendRedirect("/index.html");
 		}
 
-		
-		hl.LEAVE();
+
 	}//END OF doGet()
 }//END OF CLASS
