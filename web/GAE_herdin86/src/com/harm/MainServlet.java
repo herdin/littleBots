@@ -1,6 +1,8 @@
 package com.harm;
 
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -9,9 +11,9 @@ import javax.servlet.http.HttpServletResponse;
 @SuppressWarnings("serial")
 public class MainServlet extends HttpServlet {
 	public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-//		Logger logger = Logger.getLogger(this.getClass().getSimpleName());
+		Logger logger = Logger.getLogger(this.getClass().getSimpleName());
 //		logger.log(Level.INFO, this.getClass().getSimpleName() + "." + Thread.currentThread().getStackTrace()[1].getMethodName());
-		
+		logger.log(Level.INFO, "LOG_TEST");
 		
 //		System.out.println(req.getRequestURI());
 		
