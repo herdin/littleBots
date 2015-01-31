@@ -12,22 +12,25 @@ public class herdinLogging {
 //		
 //		return hLog;
 //	}//END OF getInstance()
-
+	private String className = null;
+	public herdinLogging() {}
+	public herdinLogging(Object object) {
+		this.className = object.getClass().getSimpleName();
+	}
 	
-	
-	public void ENTER(Object object) {
+	public void ENTER() {
 		System.out.println(
-				"#herdin : ENTER : " +
-				object.getClass().getSimpleName() + " : " +
-				Thread.currentThread().getStackTrace()[2].getMethodName()
+				"#herdin : " +
+				this.className + " : " +
+				Thread.currentThread().getStackTrace()[2].getMethodName() + " : ENTER"
 		);
 	}//END OF ENTER()
 	
-	public void LEAVE(Object object) {
+	public void LEAVE() {
 		System.out.println(
-				"#herdin : LEAVE : " +
-				object.getClass().getSimpleName() + " : " +
-				Thread.currentThread().getStackTrace()[2].getMethodName()
+				"#herdin : " +
+				this.className + " : " +
+				Thread.currentThread().getStackTrace()[2].getMethodName() + " : LEAVE"
 		);		
 	}//END OF LEAVE()
 	

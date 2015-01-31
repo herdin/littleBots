@@ -12,7 +12,7 @@ import javax.servlet.http.HttpServletResponse;
 public class DataStoreTestServlet extends HttpServlet {
 	
 	public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
-		herdinLogging.getInstance().ENTER(this);
+//		herdinLogging.getInstance().ENTER(this);
 	
 		req.getRequestDispatcher("/index.html").forward(req, resp);
 		
@@ -30,6 +30,6 @@ public class DataStoreTestServlet extends HttpServlet {
 		 */
 		
 		
-		herdinLogging.getInstance().LEAVE(this);
+//		herdinLogging.getInstance().LEAVE(this);
 	}//END OF doGet()
 }//END OF CLASS
