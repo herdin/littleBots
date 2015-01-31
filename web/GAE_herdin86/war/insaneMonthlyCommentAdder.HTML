@@ -1,0 +1,236 @@
+<!doctype html>
+<meta charset="utf-8">
+<html>
+<head><title></title>
+<!-- SEARCH FOR MORE GOOGLE FONT! -->
+<link href='http://fonts.googleapis.com/css?family=Audiowide' rel='stylesheet' type='text/css'>
+<link href='http://fonts.googleapis.com/css?family=Shadows+Into+Light' rel='stylesheet' type='text/css'>
+<link href='http://fonts.googleapis.com/css?family=Bangers' rel='stylesheet' type='text/css'>
+<style type="text/css">
+	@import url(http://fonts.googleapis.com/earlyaccess/nanumgothic.css);
+	body, button, div, input, textarea, pre, select{
+		font-size : 12px;
+		font-family:	'Nanum Gothic' , '굴림';
+		font-backup:	'Audiowide',
+									'Shadows Into Light',
+									'Bangers',
+									cursive;
+	}
+</style>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+<script type=text/javascript>
+//GLOBAL VARIABLE
+var DEBUG = false;
+var VER = "1.2";
+/*
+ * VER 1.0 : FIRST RELEASE.
+ * VER 1.1 : ADD CCL.
+ * VER 1.2 : DEL CCL(FOR SIMPLICITY). ADD DEBUG(NOT SEND MODE).
+ */
+var fileContent = "";
+var strUrl = "http://gofficeplus.lgcns.com/MbMain.do?method=addHappy&type=H&sysTypeCd=BL&publicFg=Y";
+var targetEmpNum = "&docId=";
+var userEmpNum = "&blogEmpNo=";
+var replyOwnrId = "&replyOwnrId=";
+var contents = "&contents=";
+
+var ERROR_PROGRAM_UNKNOWN = "invalid program exit status.";
+var ERROR_NOT_SUPPORT_FILE_TYPE = "invalid file type.";
+var ERROR_INVALID_FILE_CONTENTS = "invalid file contents.\nfile contents must be like below..\n00000 EMP_NAME CONTENTS1 CONTENTS2\n00000 EMP_NAME CONTENTS1 CONTENTS2";
+
+var workingWindow;
+
+var arr_Number = new Array();
+var arr_Name = new Array();
+var arr_Contents = new Array();
+
+/*
+arr_Number[0]  = "사원사번1"; arr_Name[0] = "사원이름1"; arr_Contents[0] = "댓글내용1"; 
+arr_Number[1]  = "사원사번2"; arr_Name[1] = "사원이름2"; arr_Contents[0] = "댓글내용2";
+arr_Number[2]  = "사원사번3"; arr_Name[2] = "사원이름3"; arr_Contents[0] = "댓글내용3";
+*/
+
+///////////////////////////////////
+/////////////////////DOCUMENT READY
+///////////////////////////////////
+$(document).ready(function() {
+	//VERSION SETTING
+	$("#version").html( $("#version").html() + VER);
+
+	//START OF saveTime CLICK EVENT
+	$("#saveTime").click(function() {
+		if(addCommentor_init()) {
+			addCommentor_start();
+		} else {
+			alert(ERROR_PROGRAM_UNKNOWN);
+		}
+	});
+	//END OF saveTime CLICK EVENT
+
+	var fileInput = $("#fileInput").get(0);//document.getElementById("fileInput");
+	
+	//START OF FILE INPUT EVENT
+	fileInput.addEventListener("change",
+		function(e) {
+			fileContent = "";
+			var filee = fileInput.files[0];
+			var textType = /text.*/;
+			if(filee.type.match(textType)) {
+				var reader = new FileReader();
+				reader.onload = function(e) {
+													$("#fileContent").val(reader.result);
+												}
+				reader.readAsText(filee, "UTF-8");//euc-kr
+			} else {
+				alert(ERROR_NOT_SUPPORT_FILE_TYPE);
+			}//END OF IF/ELSE
+	});
+	//END OF EVENT LISTENER
+	
+	$("#fileformat").click(function(){
+		var formatEx =	"74737 김수한 안녕하세요 김부장님\n" +
+										"73728 박무한 안녕하십니까 박부장님!";
+		alert(formatEx);
+	});//END OF CLICK
+
+});//END OF READY
+
+///////////////////////////////////
+/////////////////ADD COMMENTOR INIT
+///////////////////////////////////
+function addCommentor_init() {
+	var i = 0; var j = 0;
+	
+	var fileContent = $("#fileContent").val();
+	if(fileContent.length == 0)
+		return false;
+		
+	//var pattern_line = /[\wㄱ-힣.,;:\'\"\[{\]}\|`~!@#$%^&*()-_=+ ]+/g;
+	var pattern_line = /^.*$/mg;
+	//var pattern_exceptSpace = /[\wㄱ-힣.,;:\'\"\[{\]}\|`~!@#$%^&*()-_=+]+/g;
+	var pattern_exceptSpace = /[^ ]+/g;
+	var lines = fileContent.match(pattern_line);
+	
+	for(i=0; i<lines.length; i++) {
+		
+		var words = lines[i].match(pattern_exceptSpace);
+		arr_Contents[i] = "";
+		
+		for(j=0; j<words.length; j++) {
+			//console.log(words[j]);
+			if(j == 0) {
+				//EMP NUMBER LENGTH != 5 THAN EXCEPTION
+				if(words[j].length != 5) {
+					alert(ERROR_INVALID_FILE_CONTENTS + "\n" + i + " line, " + j + " th words." );
+					return false;
+				}
+				arr_Number[i] = words[j]; 
+			} else if(j == 1) {
+				//EMP NAME
+				arr_Name[i] = words[j];
+			} else {
+				//CONTENTS
+				arr_Contents[i] += words[j] + " ";
+			}
+		}//END OF INNER FORLOOP
+		
+		//START OF DETOUR LOGIC FOR GET METHOD
+		arr_Contents[i] = arr_Contents[i].replace(/ /g, "%20");
+		arr_Contents[i] = arr_Contents[i].replace(/\&/g, "%26");
+		arr_Contents[i] = arr_Contents[i].replace(/\+/g, "%2B");
+		arr_Contents[i] = arr_Contents[i].replace(/\#/g, "%23");
+		//END OF DETOUR LOGIC FOR GET METHOD
+		
+	}//END OF OUTER FORLOOP
+	
+	workingWindow = window.open("", "workingWindow");
+		
+	return true;
+}//END OF addCommentor_init()
+
+var intervalf;
+var inx;
+
+///////////////////////////////////
+////////////////ADD COMMENTOR START
+///////////////////////////////////
+function addCommentor_start() {
+	$("#chk").html("0/"+arr_Number.length);
+	$("#pbar").attr("max", arr_Number.length);
+	inx = 0;
+	intervalf = setInterval(function(){ addCommentor_processing(); }, 2000);
+}//END OF addCommentor_start()
+
+///////////////////////////////////
+///////////ADD COMMENTOR PROCESSING
+///////////////////////////////////
+var default_Content = "^^;";
+function addCommentor_processing() {
+	if(inx == arr_Number.length) {
+		addCommentor_end();
+		return;
+	}
+	$("#chk").html("" + (inx+1) + "/" + arr_Number.length);
+
+	if(arr_Contents[inx].length > 0) {
+		default_Content = arr_Contents[inx];
+	}
+	
+	var newA = document.createElement("a");
+	newA.id = arr_Number[inx];
+	newA.innerHTML = arr_Number[inx] + "_" + arr_Name[inx];
+	newA.href =	strUrl +
+							targetEmpNum + arr_Number[inx] +
+							userEmpNum + arr_Number[inx] +		//it means userEmpNumber but it doesn't work.. useless maybe(1)
+							replyOwnrId + arr_Number[inx] +		//it means userEmpNumber but it doesn't work.. useless maybe(2)
+							contents + default_Content;
+	newA.style.visibility = "hidden";
+	newA.target = "workingWindow";
+	document.body.appendChild(newA);
+	document.body.appendChild(document.createElement("br"));
+	
+	console.log("inx[" + inx + "] : target emp name[" + arr_Name[inx] + "] : contents length[" + arr_Contents[inx].length + "] : contents[" + default_Content + "] : url : " + newA.href);
+
+	if(!DEBUG) {
+		newA.click();
+	}
+	
+	$("#pbar").attr("value", ++inx);
+}//END OF addCommentor_processing()
+
+///////////////////////////////////
+//////////////////ADD COMMENTOR END
+///////////////////////////////////
+function addCommentor_end() {
+	window.clearInterval(intervalf);
+	workingWindow.close();
+}//END OF addCommentor_end()
+
+</script>
+</head>
+
+<body>
+
+<br><img src="https://cdn4.iconfinder.com/data/icons/dortmund/Dortmund-32x32/full-time.png" style="height:9px;">
+<b>usage</b> : input config text file, and push "save time" button. that's all. config file format like this.
+<img id="fileformat" src="https://cdn4.iconfinder.com/data/icons/dortmund/Dortmund-32x32/sign-out.png" style="height:9px;">
+
+<br><img src="https://cdn4.iconfinder.com/data/icons/dortmund/Dortmund-32x32/email.png" style="height:9px;">
+<b>feedback</b> : herdin86@gmail.com
+
+<br><img src="https://cdn4.iconfinder.com/data/icons/dortmund/Dortmund-32x32/check.png" style="height:9px;">
+<b>version</b> : <span id="version"></span>
+
+<br><br><input type="file" id="fileInput">
+
+<br><br><input type="button" id="saveTime" value="save time" style="background:white; border:1px solid #ddd;"/>
+<progress 					 id="pbar" value="0" max="100"></progress>
+<div id="chk"></div>
+
+
+<div style="visibility:hidden;">
+	<textarea id="fileContent"></textarea>
+</div>
+
+</body>
+</html>
