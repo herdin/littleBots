@@ -49,8 +49,8 @@ public class JangHelper extends JFrame{
 			insaneChkList == null	||
 			insaneChkSum == null	||
 			lineCnt == 0	) {
-			println("need init table data");
-			this.setTitle("need init table data");
+			println("NEED INIT TABLE DATA.");
+			this.setTitle("NEED INIT TABLE DATA.");
 			this.setVisible(true);
 			return;
 		}
@@ -147,7 +147,7 @@ public class JangHelper extends JFrame{
 			int[][] insaneChkList = null;
 			ArrayList<String> fileList = new ArrayList<String>();
 			ArrayList<String> contacList = null;
-			
+			int[] fileStatus = null;
 			//read config file
 			//74053 EmpName1
 			//74054 EmpName2
@@ -173,13 +173,15 @@ public class JangHelper extends JFrame{
 				throw new Exception();
 			}
 			
-			println("config file load ok");
+			println("CONFIG FILE LOAD OK.");
 			
-			//init check table
-			//lineCnt = EmpCnt in config file
+			//INIT CHECK TABLE
 			insaneChkList = new int[lineCnt][];
+			//INIT FILE STATUS ARRAY
+			fileStatus = new int[lineCnt];
 			for(int i=0; i<lineCnt; i++) {
 				insaneChkList[i] = new int[lineCnt];
+				fileStatus[i] = -1;
 				for(int j=0; j<lineCnt; j++) {
 					insaneChkList[i][j] = 0;
 				}
@@ -207,6 +209,7 @@ public class JangHelper extends JFrame{
 			Calendar cal = Calendar.getInstance();
 			int fileIndex;
 			
+			//START OF WHILE-LOOP : ALL FILE
 			for(fileIndex = 0; fileIndex<fileList.size(); fileIndex++) {
 //				println(fileList.get(fileIndex));
 				
@@ -223,11 +226,12 @@ public class JangHelper extends JFrame{
 				contacList = new ArrayList<String>();
 				SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 				Date writtenDate = null;
-				Date nowDate = new Date();
-//				Date nowDate = dateFormat.parse("2014-01-13 10:33:56");
+//				Date nowDate = new Date();
+				Date nowDate = dateFormat.parse("2015-02-13 10:33:56");
 				
 				try {
 					
+					//START OF WHILE-LOOP : ONE FILE READ
 					while((line=reader.readLine()) != null) {
 														//println(line);
 						if(line.indexOf("<td class=\"blog_reply_info") != -1) {
@@ -255,7 +259,7 @@ public class JangHelper extends JFrame{
 							int exceptLimitMonth = cal.get(Calendar.MONTH) + 1;
 							
 							if(writtenMonth == exceptLimitMonth) {
-								//no need to exam past month
+								fileStatus[fileIndex] = 0;
 								break;
 							} else if(writtenMonth == measureMonth) { //일단 다넣음.
 								contacList.add(contacEmpName);
@@ -268,7 +272,7 @@ public class JangHelper extends JFrame{
 //								if(monthNow)
 //							}
 						}//END OF IF
-					}//END OF INNER WHILE-LOOP : ONE FILE READ
+					}//END OF WHILE-LOOP : ONE FILE READ
 					
 				} catch (IOException e) {
 					println("catch IOException[2] : read line exception : " + e.getStackTrace());
@@ -283,20 +287,27 @@ public class JangHelper extends JFrame{
 						println("catch IOException[3] : reader close exception : " + e.getStackTrace());
 						throw new Exception();
 					}
-				}
+				}//END OF TRY/CATCH/FINALLY
 				
-				//START OF FOR-LOOP : check contact list
+				//START OF FOR-LOOP : CHECK CONTACT LIST
 				for(int i=0; i<contacList.size(); i++) {	//연락한놈들만큼 반복
 					String contacNm = contacList.get(i);
 					for(int j=0; j<empNmList.size(); j++) {		//config파일에 적혀있는 팀원만큼 반복
-						if(empNmList.get(j).equals(contacNm)) {		//config파일에 적혀있는 팀원이면,
+						if(insaneChkList[j][fileIndex] == 1) {
+							continue;
+						} else if(empNmList.get(j).equals(contacNm)) {		//config파일에 적혀있는 팀원이면,
 							insaneChkList[j][fileIndex] = 1;		//[팀원순서][파일주인순서] 행렬에 마킹함.
 							break;
 						}
 					}
-				}//END OF INNER FORLOOP
+				}//END OF FOR-LOOP : CHECK CONTACT LIST
 			
-			}//BE OUTER FORLOOP : FILE
+			}//END OF FOR-LOOP : ALL FILE
+
+			println("FILE STATUSES : NORMAL(0) ABNORMAL(-1)");
+			for(int i=0; i<lineCnt; i++) {
+				println(empNmList.get(i) + "\t FILE STATUS : " + fileStatus[i]);
+			}
 			
 			//sum contact check
 			int[] insaneChkSum = new int[lineCnt];
@@ -314,7 +325,7 @@ public class JangHelper extends JFrame{
 			
 			//show result via swing
 			new JangHelper(lineCnt, empNumList, empNmList, insaneChkList, insaneChkSum).startSwing();
-			println("normal exit");
+			println("NORMAL EXIT.");
 
 		 } catch (Exception e) {
 			 println("catch MAIN Exception : " + e.getStackTrace());

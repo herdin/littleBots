@@ -20,11 +20,12 @@
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
 <script type=text/javascript>
 //GLOBAL VARIABLE
-var DEBUG = true;
-var VER = "1.1";
+var DEBUG = false;
+var VER = "1.2";
 /*
- * VER 1.0 : FIRST RELEASE
- * VER 1.1 : ADD CCL
+ * VER 1.0 : FIRST RELEASE.
+ * VER 1.1 : ADD CCL.
+ * VER 1.2 : DEL CCL(FOR SIMPLICITY). ADD DEBUG(NOT SEND MODE).
  */
 var fileContent = "";
 var strUrl = "http://gofficeplus.lgcns.com/MbMain.do?method=addHappy&type=H&sysTypeCd=BL&publicFg=Y";
@@ -110,19 +111,6 @@ function addCommentor_init() {
 	var pattern_exceptSpace = /[^ ]+/g;
 	var lines = fileContent.match(pattern_line);
 	
-	//START OF DEBUG
-	/*
-	for(i=0; i<lines.length; i++) {
-		console.log(lines[i]);
-		var words = lines[i].match(pattern_exceptSpace);
-		for(j=0; j<words.length; j++) {
-			console.log("\t" + words[j]);
-		}
-	}
-	return false;
-	*/
-	//END OF DEBUG
-	
 	for(i=0; i<lines.length; i++) {
 		
 		var words = lines[i].match(pattern_exceptSpace);
@@ -179,7 +167,7 @@ function addCommentor_start() {
 var default_Content = "^^;";
 function addCommentor_processing() {
 	if(inx == arr_Number.length) {
-		jangHelper_end();
+		addCommentor_end();
 		return;
 	}
 	$("#chk").html("" + (inx+1) + "/" + arr_Number.length);
@@ -201,9 +189,11 @@ function addCommentor_processing() {
 	document.body.appendChild(newA);
 	document.body.appendChild(document.createElement("br"));
 	
-	console.log("inx[" + inx + "] : target emp name[" + arr_Name[inx] + "] : contents length[" + arr_Contents[inx].length + "] : contents[" + arr_Contents[inx] + "] : url : " + newA.href);
+	console.log("inx[" + inx + "] : target emp name[" + arr_Name[inx] + "] : contents length[" + arr_Contents[inx].length + "] : contents[" + default_Content + "] : url : " + newA.href);
 
-	newA.click();
+	if(!DEBUG) {
+		newA.click();
+	}
 	
 	$("#pbar").attr("value", ++inx);
 }//END OF addCommentor_processing()
@@ -211,10 +201,10 @@ function addCommentor_processing() {
 ///////////////////////////////////
 //////////////////ADD COMMENTOR END
 ///////////////////////////////////
-function jangHelper_end() {
+function addCommentor_end() {
 	window.clearInterval(intervalf);
 	workingWindow.close();
-}//END OF jangHelper_end()
+}//END OF addCommentor_end()
 
 </script>
 </head>
@@ -236,10 +226,6 @@ function jangHelper_end() {
 <br><br><input type="button" id="saveTime" value="save time" style="background:white; border:1px solid #ddd;"/>
 <progress 					 id="pbar" value="0" max="100"></progress>
 <div id="chk"></div>
-
-<br><br><a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/4.0/">
-	<img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/4.0/88x31.png"
-	title="insaneMonthlyCommentAdder by herdin is licensed under a Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License."/></a>
 
 
 <div style="visibility:hidden;">
