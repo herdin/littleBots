@@ -208,6 +208,8 @@ $(document).ready(function(){
 			patt = /[A-Za-z0-9_()\"]+/g;
 			arr = output.match(patt);
 			*/
+			
+		//END OF else if(dataType == MYSQL)
 		} else {
 		//////////////////////////////////
 		/////////////////////////EXCEPTION
@@ -222,19 +224,12 @@ $(document).ready(function(){
 		var pattPhysicalName = /XPHYSICALX/g;
 		var pattLogicalName = /XLOGICALX/g;
 		var pattPackageName = /XPACKAGEX/g;
+		var package_name_for_dao = package_name.replace(".", "/");
 
 		output = "";
 		output = $("#inputbox_for_dao").val().replace(pattPhysicalName, table_physical_name);
 		output = output.replace(pattLogicalName, table_logical_name);
-		output = output.replace(pattPackageName, package_name);
-		
-		if(dataType == MYSQL) {
-		//////////////////////////////////
-		/////////////////////////////MYSQL
-		//////////////////////////////////
-			var pattClosed = /\/closed/g;
-			output = output.replace(pattClosed, "");	
-		}
+		output = output.replace(pattPackageName, package_name_for_dao);
 		
 		$("#outputbox_for_dao").val(output);
 		
@@ -462,12 +457,18 @@ $(document).ready(function(){
 						"public class "+ table_logical_name +"FieldHandler implements FieldHandlerInterface {\n\n" +
 						"\tprivate BaseFieldInterface field;\n\n" +
 						"\tprivate final String tableAliasName = \"" + table_logical_name + "\";\n\n";
+						
+		if(dataType == ORACLE || dataType == MYSQL) {
+			fieldOutput_start1 = fieldOutput_start1 + 
+						"\t@FieldClassName(name = \"smartafc.core.bizframe.field." + package_name + "." + table_logical_name +"FieldHandler\")\n";
+/*	//old ver : when ORACLE => closed fixed, MYSQL => busdepot fixed time.
 		if(dataType == ORACLE) {
 			fieldOutput_start1 = fieldOutput_start1 + 
 						"\t@FieldClassName(name = \"smartafc.core.bizframe.field.closed." + package_name + "." + table_logical_name +"FieldHandler\")\n";
 		} else if(dataType == MYSQL) {
 			fieldOutput_start1 = fieldOutput_start1 + 
 						"\t@FieldClassName(name = \"smartafc.core.bizframe.field." + package_name + "." + table_logical_name +"FieldHandler\")\n";
+*/
 		} else {
 			alert(ERR_INVALID_DB_TYPE);
 			return;
@@ -717,6 +718,13 @@ $(document).ready(function(){
 		var deleteQueryName = "deleteXLOGICALXInfo";
 		
 		var commonComment_start;
+		
+		if( dataType == ORACLE || dataType == MYSQL ) {
+		//////////////////////////////////
+		//////////////////////ORACLE|MYSQL
+		//////////////////////////////////
+			commonComment_start = "/* smartafc.core.bizframe.XPACKAGEX.XLOGICALX.";
+/*	//old ver : when ORACLE => closed fixed, MYSQL => busdepot fixed time.
 		if( dataType == ORACLE) {
 		//////////////////////////////////
 		////////////////////////////ORACLE
@@ -727,6 +735,7 @@ $(document).ready(function(){
 		/////////////////////////////MYSQL
 		//////////////////////////////////
 			commonComment_start = "/* smartafc.core.bizframe.XPACKAGEX.XLOGICALX.";
+*/
 		} else {
 		//////////////////////////////////
 		/////////////////////////EXCEPTION
@@ -830,7 +839,7 @@ function leave(){
 	<button id="clr" name="btn" style="border:1px solid #ddd;background:white;">CLEAR</button>
 	TABLE PHYSICAL NAME : <input	id="table_physical_name"	type="text" style="border:1px solid #ddd;background:white;"/>
 	TABLE LOGICAL  NAME : <input	id="table_logical_name"		type="text" style="border:1px solid #ddd;background:white;" />
-	PACKAGE NAME : <input  			id="package_name"					type="text" style="border:1px solid #ddd;background:white;" />
+	UNDER BIZFRAME PACKAGE NAME : <input	id="package_name"					type="text" style="border:1px solid #ddd;background:white;" />
 	<br><img src="https://cdn4.iconfinder.com/data/icons/dortmund/Dortmund-32x32/full-time.png" style="height:9px;">
 	<b>usage</b>(oracle:pl/sql)  : open new SQL Window, type (TABLE NAME), right click, Describe, click Name, copy & paste to first textarea.
 		<img id="convert" src="https://cdn4.iconfinder.com/data/icons/dortmund/Dortmund-32x32/sign-out.png" style="height:9px;">
@@ -978,7 +987,7 @@ public class XLOGICALXDAO extends BaseDAO<XLOGICALXBean, BaseMultiBean<XLOGICALX
             param.setString("betweenCondition", betweenCondition.toString());
             param.setString("inCondition", inCondition.toString());
             param.setString("orderCondition", orderCondition.toString());
-            LCommonDao commonDao = new LCommonDao("/smartafc/core/bizframe/closed/XPACKAGEX/XLOGICALX/inquiryXLOGICALXList", param, dbSpec);
+            LCommonDao commonDao = new LCommonDao("/smartafc/core/bizframe/XPACKAGEX/XLOGICALX/inquiryXLOGICALXList", param, dbSpec);
             bean.setLData(commonDao.executeQueryForSingle());
         } catch (DevonException de) {
             throw ExceptionUtil.getException(de, dbSpec);
@@ -1004,7 +1013,7 @@ public class XLOGICALXDAO extends BaseDAO<XLOGICALXBean, BaseMultiBean<XLOGICALX
             param.setString("betweenCondition", betweenCondition.toString());
             param.setString("inCondition", inCondition.toString());
             param.setString("orderCondition", orderCondition.toString());
-            LCommonDao commonDao = new LCommonDao("/smartafc/core/bizframe/closed/XPACKAGEX/XLOGICALX/inquiryXLOGICALXList", param, dbSpec);
+            LCommonDao commonDao = new LCommonDao("/smartafc/core/bizframe/XPACKAGEX/XLOGICALX/inquiryXLOGICALXList", param, dbSpec);
             LMultiData lmData = commonDao.executeQuery();
             
             multiBean.setLmDataOnly(lmData);
@@ -1040,7 +1049,7 @@ public class XLOGICALXDAO extends BaseDAO<XLOGICALXBean, BaseMultiBean<XLOGICALX
             param.setString("orderCondition", orderCondition.toString());
             param.setString("devonTargetRow", pagingData.getString("devonTargetRow"));
 
-            LCommonDao commonDao = new LCommonDao("/smartafc/core/bizframe/closed/XPACKAGEX/XLOGICALX/inquiryXLOGICALXList", param, dbSpec);
+            LCommonDao commonDao = new LCommonDao("/smartafc/core/bizframe/XPACKAGEX/XLOGICALX/inquiryXLOGICALXList", param, dbSpec);
             LMultiData lmData = commonDao.executeQueryForPage();
 
             multiBean.setLmDataOnly(lmData);
@@ -1069,7 +1078,7 @@ public class XLOGICALXDAO extends BaseDAO<XLOGICALXBean, BaseMultiBean<XLOGICALX
     public int create(XLOGICALXBean param) throws BizFrameException {
         int result = -1;
         try {
-            LCommonDao commonDao = new LCommonDao("/smartafc/core/bizframe/closed/XPACKAGEX/XLOGICALX/createXLOGICALXInfo", param.getLData(), dbSpec);
+            LCommonDao commonDao = new LCommonDao("/smartafc/core/bizframe/XPACKAGEX/XLOGICALX/createXLOGICALXInfo", param.getLData(), dbSpec);
             result = commonDao.executeUpdate();
         } catch (DevonException de) {
             throw ExceptionUtil.getException(de, dbSpec);
@@ -1088,7 +1097,7 @@ public class XLOGICALXDAO extends BaseDAO<XLOGICALXBean, BaseMultiBean<XLOGICALX
     public int[] create(BaseMultiBean<XLOGICALXBean> params) throws BizFrameException {
         int[] results = null;
         try {
-            LMultiDao multiDao = new LMultiDao("/smartafc/core/bizframe/closed/XPACKAGEX/XLOGICALX/createXLOGICALXInfo", dbSpec);
+            LMultiDao multiDao = new LMultiDao("/smartafc/core/bizframe/XPACKAGEX/XLOGICALX/createXLOGICALXInfo", dbSpec);
             multiDao.add(params.getLmData());
             results = multiDao.executeUpdate();
         } catch (DevonException de) {
@@ -1110,7 +1119,7 @@ public class XLOGICALXDAO extends BaseDAO<XLOGICALXBean, BaseMultiBean<XLOGICALX
     public int update(XLOGICALXBean param) throws BizFrameException {
         int result = -1;
         try {
-            LCommonDao commonDao = new LCommonDao("/smartafc/core/bizframe/closed/XPACKAGEX/XLOGICALX/updateXLOGICALXInfo", param.getLData(), dbSpec);
+            LCommonDao commonDao = new LCommonDao("/smartafc/core/bizframe/XPACKAGEX/XLOGICALX/updateXLOGICALXInfo", param.getLData(), dbSpec);
             result = commonDao.executeUpdate();
         } catch (DevonException de) {
             throw ExceptionUtil.getException(de, dbSpec);
@@ -1129,7 +1138,7 @@ public class XLOGICALXDAO extends BaseDAO<XLOGICALXBean, BaseMultiBean<XLOGICALX
     public int[] update(BaseMultiBean<XLOGICALXBean> params) throws BizFrameException {
         int[] results = null;
         try {
-            LMultiDao multiDao = new LMultiDao("/smartafc/core/bizframe/closed/XPACKAGEX/XLOGICALX/updateXLOGICALXInfo", dbSpec);
+            LMultiDao multiDao = new LMultiDao("/smartafc/core/bizframe/XPACKAGEX/XLOGICALX/updateXLOGICALXInfo", dbSpec);
             multiDao.add(params.getLmData());
             results = multiDao.executeUpdate();
         } catch (DevonException de) {
@@ -1151,7 +1160,7 @@ public class XLOGICALXDAO extends BaseDAO<XLOGICALXBean, BaseMultiBean<XLOGICALX
     public int delete(XLOGICALXBean param) throws BizFrameException {
         int result = -1;
         try {
-            LCommonDao commonDao = new LCommonDao("/smartafc/core/bizframe/closed/XPACKAGEX/XLOGICALX/deleteXLOGICALXInfo", param.getLData(), dbSpec);
+            LCommonDao commonDao = new LCommonDao("/smartafc/core/bizframe/XPACKAGEX/XLOGICALX/deleteXLOGICALXInfo", param.getLData(), dbSpec);
             result = commonDao.executeUpdate();
         } catch (DevonException de) {
             throw ExceptionUtil.getException(de, dbSpec);
@@ -1170,7 +1179,7 @@ public class XLOGICALXDAO extends BaseDAO<XLOGICALXBean, BaseMultiBean<XLOGICALX
     public int[] delete(BaseMultiBean<XLOGICALXBean> params) throws BizFrameException {
         int[] results = null;
         try {
-            LMultiDao multiDao = new LMultiDao("/smartafc/core/bizframe/closed/XPACKAGEX/XLOGICALX/deleteXLOGICALXInfo", dbSpec);
+            LMultiDao multiDao = new LMultiDao("/smartafc/core/bizframe/XPACKAGEX/XLOGICALX/deleteXLOGICALXInfo", dbSpec);
             multiDao.add(params.getLmData());
             results = multiDao.executeUpdate();
         } catch (DevonException de) {
@@ -1191,9 +1200,9 @@ public class XLOGICALXDAO extends BaseDAO<XLOGICALXBean, BaseMultiBean<XLOGICALX
         int[] results = null;
         try {
             LCompoundDao compoundDao = new LCompoundDao();
-            compoundDao.setInsertQuery("/smartafc/core/bizframe/closed/XPACKAGEX/XLOGICALX/createXLOGICALXInfo");
-            compoundDao.setUpdateQuery("/smartafc/core/bizframe/closed/XPACKAGEX/XLOGICALX/updateXLOGICALXInfo");
-            compoundDao.setDeleteQuery("/smartafc/core/bizframe/closed/XPACKAGEX/XLOGICALX/deleteXLOGICALXInfo");
+            compoundDao.setInsertQuery("/smartafc/core/bizframe/XPACKAGEX/XLOGICALX/createXLOGICALXInfo");
+            compoundDao.setUpdateQuery("/smartafc/core/bizframe/XPACKAGEX/XLOGICALX/updateXLOGICALXInfo");
+            compoundDao.setDeleteQuery("/smartafc/core/bizframe/XPACKAGEX/XLOGICALX/deleteXLOGICALXInfo");
             compoundDao.addWithJobType(params.getLmData(), dbSpec);
             results = compoundDao.executeUpdate();
         } catch (DevonException de) {
