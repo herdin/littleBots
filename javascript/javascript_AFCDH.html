@@ -271,7 +271,8 @@ $(document).ready(function(){
 				//debugprint(i);
 				
 				if(arr_field[i].search("_") == -1) {
-					functionNames[functionNames.length] = arr_field[i].toLowerCase();
+					functionNames[functionNames.length] =
+						arr_field[i].substring(0, 1).toUpperCase() + arr_field[i].substring(1, arr_field[i].length).toLowerCase();
 				} else {
 					functionNames[functionNames.length] = "";
 					
@@ -1017,12 +1018,8 @@ public class XLOGICALXDAO extends BaseDAO<XLOGICALXBean, BaseMultiBean<XLOGICALX
             LMultiData lmData = commonDao.executeQuery();
             
             multiBean.setLmDataOnly(lmData);
-            XLOGICALXBean bean = null;
-            for (int idx = 0; idx < lmData.getDataCount(); idx++) {
-            	bean = new XLOGICALXBean();
-            	bean.setLData(lmData.getLData(idx));
-                multiBean.add(bean);
-            }
+            multiBean.sync(XLOGICALXBean.class);
+            
         } catch (DevonException de) {
             throw ExceptionUtil.getException(de, dbSpec);
         }
@@ -1053,12 +1050,8 @@ public class XLOGICALXDAO extends BaseDAO<XLOGICALXBean, BaseMultiBean<XLOGICALX
             LMultiData lmData = commonDao.executeQueryForPage();
 
             multiBean.setLmDataOnly(lmData);
-            XLOGICALXBean bean = null;
-            for (int idx = 0; idx < lmData.getDataCount(); idx++) {
-            	bean = new XLOGICALXBean();
-            	bean.setLData(lmData.getLData(idx));
-                multiBean.add(bean);
-            }
+            multiBean.sync(XLOGICALXBean.class);
+            
         } catch (DevonException de) {
             throw ExceptionUtil.getException(de, dbSpec);
         }
