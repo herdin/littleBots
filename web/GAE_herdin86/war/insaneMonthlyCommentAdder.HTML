@@ -193,6 +193,8 @@ function addCommentor_processing() {
 
 	if(!DEBUG) {
 		newA.click();
+	} else {
+		alert(arr_Name[inx] + "(" + arr_Number[inx] + ") : "  + default_Content);
 	}
 	
 	$("#pbar").attr("value", ++inx);
