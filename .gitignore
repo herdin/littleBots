@@ -1,1 +1,5 @@
 *.bak
+complex/jangHelper/jangHelper_config_NOT_SYNC.txt
+javascript/insaneMonthlyCommentAdder_config.txt
+javascript/insaneMonthlyCommentAdder_config_notSYNC.txt
+javascript/insaneMonthlyCommentAdder_config_TEST.txt
