@@ -20,12 +20,13 @@
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
 <script type=text/javascript>
 //GLOBAL VARIABLE
-var DEBUG = false;
-var VER = "1.2";
+var DEBUG = true;	//AUTO CONTROL
+var VER = "1.3";	//HARD CORDING
 /*
  * VER 1.0 : FIRST RELEASE.
  * VER 1.1 : ADD CCL.
  * VER 1.2 : DEL CCL(FOR SIMPLICITY). ADD DEBUG(NOT SEND MODE).
+ * VER 1.3 : ADD DEBUG MODE.
  */
 var fileContent = "";
 var strUrl = "http://gofficeplus.lgcns.com/MbMain.do?method=addHappy&type=H&sysTypeCd=BL&publicFg=Y";
@@ -100,6 +101,12 @@ $(document).ready(function() {
 ///////////////////////////////////
 function addCommentor_init() {
 	var i = 0; var j = 0;
+	
+	if($("input:checkbox[id='debug']").is(":checked")) {
+		DEBUG = true;
+	} else {
+		DEBUG = false;
+	}
 	
 	var fileContent = $("#fileContent").val();
 	if(fileContent.length == 0)
@@ -222,6 +229,9 @@ function addCommentor_end() {
 
 <br><img src="https://cdn4.iconfinder.com/data/icons/dortmund/Dortmund-32x32/check.png" style="height:9px;">
 <b>version</b> : <span id="version"></span>
+
+<br><img src="https://cdn4.iconfinder.com/data/icons/dortmund/Dortmund-32x32/config.png" style="height:9px;">
+<b>debug</b> : <input type="checkbox" id="debug"></input>
 
 <br><br><input type="file" id="fileInput">
 
