@@ -784,6 +784,43 @@ $(document).ready(function(){
 	});//END OF CLICK
 
 	$("#convert").click(function(){
+/*
+SHOULD CHANGE BELOW QUERY
+-- INPUT DATA CONVERTOR (ORACLE -> MYSQL) 
+-- 1. INPUT YOUR TABLE_NAME TO 'TABLE NAME
+-- 2. AFTER GENERATING INPUT DATA, TYPE DEFAULT VALUE.
+WITH TABLENAME AS(SELECT 'TABLE_NAME' AS  FROM DUAL)
+SELECT '\begin{tabular}{ c  c  c  c  c  c }' AS INPUT_DATA,
+       0 AS COLUMN_ID FROM DUAL
+UNION
+SELECT 
+       COLUMN_NAME           || ' & ' ||
+       DATA_TYPE             || ' & ' ||
+       DECODE(NULLABLE, 'N', 'NO', 'Y', 'YES')         || ' & ' ||
+       MARK                  || ' & ' ||
+       ' '                   || ' & ' ||
+       ' '                   || '\\' AS INPUT_DATA,
+       ATC.COLUMN_ID
+FROM ALL_TAB_COLUMNS ATC
+LEFT JOIN 
+     (
+    SELECT COLUMN_NAME AS PRIMARY_COLUMN_NAME,
+           'PRI' AS MARK
+    FROM ALL_CONS_COLUMNS ACC
+    WHERE ACC.TABLE_NAME = (SELECT * FROM TABLENAME) AND
+          ACC.CONSTRAINT_NAME = 
+                          (SELECT AC.CONSTRAINT_NAME
+                          FROM ALL_CONSTRAINTS AC
+                          WHERE AC.TABLE_NAME = (SELECT * FROM TABLENAME)   AND
+                                AC.CONSTRAINT_TYPE = 'P')
+     ) PK ON ATC.COLUMN_NAME = PK.PRIMARY_COLUMN_NAME
+WHERE ATC.TABLE_NAME = (SELECT * FROM TABLENAME)
+UNION
+SELECT '\end{tabular}' AS INPUT_DATA,
+       99 AS COLUMN_ID
+FROM DUAL
+ORDER BY COLUMN_ID;
+*/		
 		var query = 
 		    "-- INPUT DATA CONVERTOR (ORACLE -> MYSQL)\n" 
 			+ "-- 1. INPUT YOUR TABLE_NAME TO \'TABLE NAME\n"
