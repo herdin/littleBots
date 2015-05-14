@@ -3,7 +3,6 @@ package com.harm.unmani;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
@@ -17,17 +16,17 @@ import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
-import javax.xml.bind.DataBindingException;
 
 @SuppressWarnings("serial")
 public class JangHelper extends JFrame{
+	private int lineCnt = 0;
 	private ArrayList<String> empNumList = null;			
 	private ArrayList<String> empNmList = null;
 	private int[][] insaneChkList = null;
 	private int[] insaneChkSum = null;
-	private int lineCnt = 0;
 	
-	public JangHelper() {}
+	
+//	public JangHelper() {}
 	public JangHelper(	int lineCnt,
 						ArrayList<String> empNumList,
 						ArrayList<String> empNmList,
@@ -35,8 +34,8 @@ public class JangHelper extends JFrame{
 						int[] insaneChkSum) {
 		super("JangHelper");
 		this.lineCnt = lineCnt;
-		this.empNmList = empNmList;
 		this.empNumList = empNumList;
+		this.empNmList = empNmList;
 		this.insaneChkList = insaneChkList;
 		this.insaneChkSum = insaneChkSum;
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -44,6 +43,7 @@ public class JangHelper extends JFrame{
 	
 	public void startSwing(){
 		println("JangHelper start");
+		
 		if(	empNumList == null		||
 			empNmList == null		||
 			insaneChkList == null	||
@@ -117,28 +117,25 @@ public class JangHelper extends JFrame{
 //			public void componentShown(ComponentEvent e) {}
 //		});
 		this.setVisible(true);
-		
+		println("JangHelper end");
 	}//END OF startSwing
 	
 	public static boolean debug = true;
-	public static void print(String msg) {
-		if(debug)
-			System.out.print(msg);
-	}
-	public static void println(String msg) {
-		if(debug)
-			System.out.println(msg);
-	}
+	public static void print(String msg)	{ if(debug) System.out.print(msg); }
+	public static void println(String msg)	{ if(debug) System.out.println(msg); }
 	
-	
+	public static String DEFAULT_XML_NAME	= "MessageComment";
+	public static String FILE_EXTENSION		= ".xls";
+	public static String FROM_DATE			= "2015-01-01 00:00:00";
+	public static String TO_DATE			= "2015-01-31 23:59:59";
 	
 	public static void main(String[] args) {
 		
 		try {
 			BufferedReader reader = null;
 			String line = null;
-			String defaultXlsName = "MessageComment";
-			String fileExtension = ".xls";
+			String defaultXlsName = DEFAULT_XML_NAME;
+			String fileExtension = FILE_EXTENSION;
 	
 			int lineCnt = 0;
 			
@@ -148,12 +145,14 @@ public class JangHelper extends JFrame{
 			ArrayList<String> fileList = new ArrayList<String>();
 			ArrayList<String> contacList = null;
 			int[] fileStatus = null;
+			
+			long appStartTime = System.currentTimeMillis();
 			//read config file
 			//74053 EmpName1
 			//74054 EmpName2
 			try {
 				reader = new BufferedReader(
-							new InputStreamReader(new FileInputStream("jangHelper_config.txt"), "UTF-8"));
+							new InputStreamReader(new FileInputStream("insaneMonthlyCommentAdder_config_TEST.txt"), "UTF-8"));
 				
 			} catch (FileNotFoundException e) {
 				println("catch FileNotFoundException[1] : config file not found. : " + e.getStackTrace());
@@ -193,7 +192,7 @@ public class JangHelper extends JFrame{
 			//MessageComment (2).xls ...
 			fileList.add(defaultXlsName + fileExtension);
 			for(int i=1; i<lineCnt; i++) {
-				fileList.add(defaultXlsName + " (" + i + ")" + fileExtension); 
+				fileList.add(defaultXlsName + "(" + i + ")" + fileExtension); 
 			}
 			
 //        <td class="blog_reply_info" align="right" id='td_1' >
@@ -208,6 +207,13 @@ public class JangHelper extends JFrame{
 			//collect contact list
 			Calendar cal = Calendar.getInstance();
 			int fileIndex;
+			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+			Date toDate = dateFormat.parse(TO_DATE);
+			Date fromDate = dateFormat.parse(FROM_DATE);
+			cal.setTime(fromDate);
+			int fromMonth = cal.get(Calendar.MONTH) + 1;
+			cal.setTime(toDate);
+			int toMonth = cal.get(Calendar.MONTH) + 1;
 			
 			//START OF WHILE-LOOP : ALL FILE
 			for(fileIndex = 0; fileIndex<fileList.size(); fileIndex++) {
@@ -224,10 +230,6 @@ public class JangHelper extends JFrame{
 				}
 				
 				contacList = new ArrayList<String>();
-				SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-				Date writtenDate = null;
-//				Date nowDate = new Date();
-				Date nowDate = dateFormat.parse("2015-02-13 10:33:56");
 				
 				try {
 					
@@ -248,29 +250,30 @@ public class JangHelper extends JFrame{
 							line = reader.readLine();	// time
 							line = line.trim();
 							
-							writtenDate = dateFormat.parse(line);
+							Date writtenDate = dateFormat.parse(line);
 							cal.setTime(writtenDate);
 							int writtenMonth = cal.get(Calendar.MONTH) + 1;
 							
-							cal.setTime(nowDate);
-							cal.add(Calendar.MONTH, -1);
-							int measureMonth = cal.get(Calendar.MONTH) + 1;
-							cal.add(Calendar.MONTH, -1);
-							int exceptLimitMonth = cal.get(Calendar.MONTH) + 1;
+//							cal.setTime(fromDate);
+//							cal.add(Calendar.MONTH, -1);
+//							int measureMonth = cal.get(Calendar.MONTH) + 1;
+//							cal.add(Calendar.MONTH, -1);
+//							int exceptLimitMonth = cal.get(Calendar.MONTH) + 1;
 							
-							if(writtenMonth == exceptLimitMonth) {
+							/**
+							 * 엑셀파일에 댓글은 최신 순서로 적힌다.
+							 * 따라서,
+							 * 1. 댓글의 입력날짜가 댓글계산시작날짜(fromDate) 보다 이전이라면, 정상파일을 모두 읽은 것으로 간주.
+							 *    -> 다음파일을 읽는다.
+							 * 2. 이전이 아니고, 댓글계산시작/종료날짜 사이에 있다면, contacList 에 해당 댓글입력자를 추가.
+							 */
+							if(writtenDate.before(fromDate)) {
 								fileStatus[fileIndex] = 0;
 								break;
-							} else if(writtenMonth == measureMonth) { //일단 다넣음.
+							} else if(fromMonth <= writtenMonth && writtenMonth <= toMonth) {
 								contacList.add(contacEmpName);
-							}
+							} 
 							
-							//System.out.println(monthNow + " / " + monthPast);
-//							if(monthNow-1 == monthPast) {
-//								contacList.add(contacEmpName);
-//							} else {
-//								if(monthNow)
-//							}
 						}//END OF IF
 					}//END OF WHILE-LOOP : ONE FILE READ
 					
@@ -289,6 +292,11 @@ public class JangHelper extends JFrame{
 					}
 				}//END OF TRY/CATCH/FINALLY
 				
+				/**
+				 * insaneChkList[i][j]
+				 * i : 팀원의 인덱스
+				 * j : i 팀원이 j 팀원에게 댓글 입력 유무 1/0
+				 */
 				//START OF FOR-LOOP : CHECK CONTACT LIST
 				for(int i=0; i<contacList.size(); i++) {	//연락한놈들만큼 반복
 					String contacNm = contacList.get(i);
@@ -327,10 +335,12 @@ public class JangHelper extends JFrame{
 			new JangHelper(lineCnt, empNumList, empNmList, insaneChkList, insaneChkSum).startSwing();
 			println("NORMAL EXIT.");
 
+			println("app processing time : " + (System.currentTimeMillis()-appStartTime));
 		 } catch (Exception e) {
 			 println("catch MAIN Exception : " + e.getStackTrace());
 		 }//END OF TRY/CATCH
 		
+			
 	}//END OF main()
 	
 }//END OF CLASS
