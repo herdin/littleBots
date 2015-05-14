@@ -110,9 +110,10 @@ $(document).ready(function(){
   	
   	var ORACLE = $("#slctOpt_oracle").val();
   	var MYSQL = $("#slctOpt_mysql").val();
-  	var VARIETY = $("#slctOpt_message").val();
+  	var MESSAGE = $("#slctOpt_message").val();
+  	var PARSING = $("#slctOpt_parsing").val();
   	
-  	var ERR_INVALID_DB_TYPE = "Set your dataBaseType properly.";
+  	var ERR_INVALID_TYPE = "Set your dataBaseType properly.";
   	
   	var dataType = $("#slct option:selected").val();
   	console.log("selected option : " + dataType);
@@ -121,11 +122,12 @@ $(document).ready(function(){
   		oracleProcess();
   	} else if(dataType == MYSQL) {
   		mysqlProcess();
-  	} else if(dataType == VARIETY) {
-  		navvyProcess();
-  	} else {
+  	} else if(dataType == MESSAGE) {
+  		messageProcess();
+  	} else if(dataType == PARSING){
   		parsingTest();
-  		//alert(ERR_INVALID_DB_TYPE);
+  	} else {
+  		alert(ERR_INVALID_TYPE);
   	}
   });//END OF CLICK EVENT
   
@@ -349,7 +351,7 @@ AGENCY_ID & varchar(3) & YES &  &  & \\
 	
 }//END OF FUNCTION
 
-function navvyProcess() {
+function messageProcess() {
 ///* //NEW PROCESS
 /*
 	#USEAGE
@@ -369,7 +371,7 @@ function navvyProcess() {
 		"\t\t<elementMod>N</elementMod>\n" +
 		"\t</element>\n";
 	
-	var MESSAGE_ID = "MA401";
+	var MESSAGE_ID = "MESSAGE_ID";
 	var BODY_SIZE = 0;
 	
 	var TYPE_TXT = "TXT";
@@ -539,7 +541,7 @@ function parsingTest() {
 	<select id="slct">
 		<option id="slctOpt_oracle" value="oracle">ORACLE</option>
 		<option id="slctOpt_mysql" value="mysql">MYSQL</option>
-		<option id="slctOpt_message" value="message">VARIETY</option>
+		<option id="slctOpt_message" value="message">MESSAGE</option>
 		<option id="slctOpt_parsing" value="parsing">PARSING</option>
 	</select>
 	<button id="btn" name="btn" style="border:1px solid #ddd;background:white;">SAVE YOUR TIME</button>
@@ -551,9 +553,11 @@ function parsingTest() {
 	<b>usage</b>(oracle:pl/sql)  : open new SQL Window, type (TABLE NAME), right click, Describe, drag Name ~ Default, copy & paste to first textarea.
 	<br><img src="https://cdn4.iconfinder.com/data/icons/dortmund/Dortmund-32x32/full-time.png" style="height:9px;">
 	<b>usage</b>(mysql :heidiSQL): in the SQL Window, type DESC (TABLE_NAME), execute(F9), right click result View, 격자행 내보내기, 출력형식:LaText, 확인, paste to first textarea.
+	<br><img src="https://cdn4.iconfinder.com/data/icons/dortmund/Dortmund-32x32/full-time.png" style="height:9px;">
+	<b>usage</b>(message : protocol word doc): in protocol word file, copy "tagOfMessage typeOfMessage sizeOfMessage" typeOfMessage in (TXT,INT,BCD), paste to first textarea.
 	<br><img src="https://cdn4.iconfinder.com/data/icons/dortmund/Dortmund-32x32/email.png" style="height:9px;">
 	<b>feedback</b> : herdin86@gmail.com 
-</div><br><br><br><br><br>
+</div><br><br><br><br><br><br><br>
 
 <div>
 	<textarea id="inputbox" rows="15" cols="80"></textarea>
