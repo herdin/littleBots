@@ -80,6 +80,7 @@ CENTR_SYSTM_TRANSM_YN & char(1) & YES &  &  & \\
 ///////////////////GLOBAL VARIABLE
 //////////////////////////////////
 var DEBUG = true;
+var VERSION = "20150518/130800";
 console.log("DEBUG MODE : " + DEBUG);
 
 var MYSQL_LATEX_PRIMARY = "PRI";
@@ -97,9 +98,10 @@ function debugprint(debugStr) {
 ///////////DOCUMENT READY FUNCTION
 //////////////////////////////////
 $(document).ready(function(){
-  $("#input").click(function(){
+  /*$("#input").click(function(){
     $("#input").val("");
-  });
+  });*/
+  $("#version").html(VERSION);
 
 ////////////////////////
 // SAVE YOUR TIME BUTTON
@@ -526,10 +528,130 @@ function messageProcess() {
 }//END OF FUNCTION
 
 function parsingTest() {
-	var inputs = $("#inputbox").val();
-	var arr;
+	var comment_head =
+		"\t<element name=\"XELEMENTX\">\n" +
+		"\t\t<elementType>XTYPEX</elementType>\n" +
+		"\t\t<elementOrgSize>XLENGTHX</elementOrgSize>\n" +
+		"\t\t<elementDBSize>XLENGTHX</elementDBSize>\n";
+	var comment_int_mod = 
+		"\t\t<elementSign>U</elementSign>\n" +
+		"\t\t<elementOrder>BIG</elementOrder>\n";
+	var comment_tail = 
+		//"\t\t<elementMod>N</elementMod>\n" +
+		"\t</element>\n";
 	
-	var regEx01 = /[\w_ (\']+/g;
+	var MESSAGE_ID = $("#messageId").val();
+	var BODY_SIZE = 0;
+	
+	var TYPE_CHAR = "CHAR";
+	var TYPE_HEX  = "HEX";
+	var TYPE_BCD  = "BCD";
+	
+	var ERR_ELEMENT_LENGTH = "one data needs ElementName/Type/Length.";
+	var ERR_UNKNOWN = "unexpected error occur.\nthere is no technical support.";
+	var ERR_ELEMENT_TYPE = " is not a type.";
+	
+	var arrElements = new Array();
+	var arrTypes = new Array();
+	var arrLengths = new Array();
+	
+	var regEx = /[\w_]+/g;
+	var regEx_element = /XELEMENTX/g;
+	var regEx_type = /XTYPEX/g;
+	var regEx_length = /XLENGTHX/g;
+	
+	var inputs = $("#inputbox").val();
+	var outputs = "";
+	var output = "";
+	var outputs2 = "";
+	var output2 = "";
+	var output_temp = "";
+	
+	var arrLine = inputs.match(regEx);
+	var i = 0;
+	var j = 0;
+	
+	//VALIDATE INPUT DATA LENGTH//
+	//XML TAG, TYPE, LENGTH
+	if(arrLine.length%3 != 0) {
+		console.log(arrLine.length);
+		alert(ERR_ELEMENT_LENGTH);
+		return;
+	}
+	
+	//ORGANIZE INPUT DATA TO ARRAYS
+	for(i=0; i<arrLine.length; i++) {
+		//console.log(arrLine[i]);
+		var strLine = arrLine[i];
+		
+		if(i%3 == 0) {
+			arrElements[arrElements.length] = strLine;
+		} else if(i%3 == 1) {
+			arrTypes[arrTypes.length] = strLine;
+		} else if(i%3 == 2) {
+			arrLengths[arrLengths.length] = strLine;
+		} else {
+			alert(ERR_UNKNOWN);	return;
+		}
+	}//END OF FORLOOP FOR ORGANIZE
+
+	//MAKING OUTPUT
+	for(i=0; i<arrElements.length; i++) {
+		
+		var tElement = arrElements[i];
+		var tType = arrTypes[i];
+		var tLength = arrLengths[i];
+		output = comment_head;
+		output2 = "";
+		output_temp = "";
+		
+		if(tType == TYPE_CHAR) {
+			
+			output = output + comment_tail;
+			output2 = output2 + "String " + tElement + "_" + tLength + " = \"";
+			for(j=0; j<Number(tLength); j++) {
+				output_temp = output_temp + (j%10);
+			}
+			output2 = output2 + output_temp + "\";\n";
+			output2 = output2 + "AddStringToBody(" + tElement + "_" + tLength + ");\n"
+			BODY_SIZE = BODY_SIZE + Number(tLength);
+			
+		} else if(tType == TYPE_BCD) {
+			
+			output = output + comment_tail;
+			output2 = output2 + "String " + tElement + "_" + tLength + " = \"";
+			for(j=0; j<Number(tLength)*2; j++) {
+				output_temp = output_temp + (j%10);
+			}
+			output2 = output2 + output_temp + "\";\n";
+			output2 = output2 + "AddBcdToBody(" + tElement + "_" + tLength + ");\n";
+			BODY_SIZE = BODY_SIZE + Number(tLength);
+			
+		} else if(tType == TYPE_HEX) {
+			
+			output = output + comment_tail;	
+			output2 = output2 + "int " + tElement + "_" + tLength + " = 0;\n";
+			output2 = output2 + "AddUintToBody(" + tElement + "_" + tLength + ", " + tLength + ");\n";
+			BODY_SIZE = BODY_SIZE + Number(tLength);
+			
+		} else {
+			
+			console.log("ERR TYPE : " + tType);
+			alert("[" + tType + "]"  + ERR_ELEMENT_TYPE);	return;
+			
+		}
+		
+		output = output.replace(regEx_element, tElement + "_" + MESSAGE_ID);
+		output = output.replace(regEx_type, tType);
+		output = output.replace(regEx_length, tLength);
+		outputs = outputs + output;
+		outputs2 = outputs2 + output2;
+		
+	}//END OF FORLOOP FOR MAKING OUTPUT
+	
+	$("#outputbox").val(outputs);
+	$("#outputbox2").val(outputs2);
+	alert("BODY SIZE : " + BODY_SIZE);
 	
 }
 </script>
@@ -541,11 +663,13 @@ function parsingTest() {
 	<select id="slct">
 		<option id="slctOpt_oracle" value="oracle">ORACLE</option>
 		<option id="slctOpt_mysql" value="mysql">MYSQL</option>
-		<option id="slctOpt_message" value="message">MESSAGE</option>
-		<option id="slctOpt_parsing" value="parsing">PARSING</option>
+		<option id="slctOpt_message" value="message">MESSAGE BUSDEPOT</option>
+		<option id="slctOpt_parsing" value="parsing">MESSAGE RELOAD</option>
 	</select>
 	<button id="btn" name="btn" style="border:1px solid #ddd;background:white;">SAVE YOUR TIME</button>
 	<button id="clr" name="btn" style="border:1px solid #ddd;background:white;">CLEAR</button>
+	message id : 
+	<input id="messageId" name="messageId" type="text"/>
 <!--	<br><img src="https://cdn4.iconfinder.com/data/icons/dortmund/Dortmund-32x32/config.png" style="height:9px;">
 	<b>configuration</b> : edit dbType in the source code. ORACLE/MYSQL.
 -->
@@ -556,7 +680,7 @@ function parsingTest() {
 	<br><img src="https://cdn4.iconfinder.com/data/icons/dortmund/Dortmund-32x32/full-time.png" style="height:9px;">
 	<b>usage</b>(message : protocol word doc): in protocol word file, copy "tagOfMessage typeOfMessage sizeOfMessage" typeOfMessage in (TXT,INT,BCD), paste to first textarea.
 	<br><img src="https://cdn4.iconfinder.com/data/icons/dortmund/Dortmund-32x32/email.png" style="height:9px;">
-	<b>feedback</b> : herdin86@gmail.com 
+	<b>feedback</b> : herdin86@gmail.com <b>version</b> : <span id="version" name="version"></span>
 </div><br><br><br><br><br><br><br>
 
 <div>
