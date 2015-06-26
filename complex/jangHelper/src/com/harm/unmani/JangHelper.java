@@ -24,7 +24,14 @@ public class JangHelper extends JFrame{
 	private ArrayList<String> empNmList = null;
 	private int[][] insaneChkList = null;
 	private int[] insaneChkSum = null;
-	
+
+	public static boolean debug = true;
+	public static String CONFIG_FILE		= "insaneMonthlyCommentAdder_config_TEST.txt";
+	public static String DEFAULT_XML_FOLDER	= "D:\\data\\";
+	public static String DEFAULT_XML_NAME	= "MessageComment";
+	public static String FILE_EXTENSION		= ".xls";
+	public static String FROM_DATE			= "2015-04-01 00:00:00";
+	public static String TO_DATE			= "2015-06-31 23:59:59";
 	
 //	public JangHelper() {}
 	public JangHelper(	int lineCnt,
@@ -120,21 +127,15 @@ public class JangHelper extends JFrame{
 		println("JangHelper end");
 	}//END OF startSwing
 	
-	public static boolean debug = true;
 	public static void print(String msg)	{ if(debug) System.out.print(msg); }
 	public static void println(String msg)	{ if(debug) System.out.println(msg); }
-	
-	public static String DEFAULT_XML_NAME	= "MessageComment";
-	public static String FILE_EXTENSION		= ".xls";
-	public static String FROM_DATE			= "2015-01-01 00:00:00";
-	public static String TO_DATE			= "2015-01-31 23:59:59";
 	
 	public static void main(String[] args) {
 		
 		try {
 			BufferedReader reader = null;
 			String line = null;
-			String defaultXlsName = DEFAULT_XML_NAME;
+			String defaultXlsFullPath = DEFAULT_XML_FOLDER + DEFAULT_XML_NAME;
 			String fileExtension = FILE_EXTENSION;
 	
 			int lineCnt = 0;
@@ -152,7 +153,7 @@ public class JangHelper extends JFrame{
 			//74054 EmpName2
 			try {
 				reader = new BufferedReader(
-							new InputStreamReader(new FileInputStream("insaneMonthlyCommentAdder_config_TEST.txt"), "UTF-8"));
+							new InputStreamReader(new FileInputStream(CONFIG_FILE), "UTF-8"));
 				
 			} catch (FileNotFoundException e) {
 				println("catch FileNotFoundException[1] : config file not found. : " + e.getStackTrace());
@@ -190,9 +191,9 @@ public class JangHelper extends JFrame{
 			//MessageComment.xls
 			//MessageComment (1).xls
 			//MessageComment (2).xls ...
-			fileList.add(defaultXlsName + fileExtension);
+			fileList.add(defaultXlsFullPath + fileExtension);
 			for(int i=1; i<lineCnt; i++) {
-				fileList.add(defaultXlsName + "(" + i + ")" + fileExtension); 
+				fileList.add(defaultXlsFullPath + "(" + i + ")" + fileExtension); 
 			}
 			
 //        <td class="blog_reply_info" align="right" id='td_1' >
@@ -271,6 +272,8 @@ public class JangHelper extends JFrame{
 								fileStatus[fileIndex] = 0;
 								break;
 							} else if(fromMonth <= writtenMonth && writtenMonth <= toMonth) {
+								//ArrayList 말고 HashSet같은걸 쓰는게 좋을것같다.
+								//두번 댓글남겨도 어차피 1번 카운트니까..
 								contacList.add(contacEmpName);
 							} 
 							
