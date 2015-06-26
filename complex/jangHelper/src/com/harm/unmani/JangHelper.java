@@ -51,7 +51,7 @@ public class JangHelper extends JFrame{
 	}//END OF CONSTRUCTOR
 	
 	public void startSwing(){
-		println("JangHelper start");
+		println("JangHelper swing start");
 		
 		if(	empNumList == null		||
 			empNmList == null		||
@@ -126,7 +126,7 @@ public class JangHelper extends JFrame{
 //			public void componentShown(ComponentEvent e) {}
 //		});
 		this.setVisible(true);
-		println("JangHelper end");
+		println("JangHelper swing end");
 	}//END OF startSwing
 	
 	public static void print(String msg)	{ if(debug) System.out.print(msg);		}
