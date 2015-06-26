@@ -11,6 +11,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Iterator;
 
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
@@ -26,12 +28,12 @@ public class JangHelper extends JFrame{
 	private int[] insaneChkSum = null;
 
 	public static boolean debug = true;
-	public static String CONFIG_FILE		= "insaneMonthlyCommentAdder_config_TEST.txt";
-	public static String DEFAULT_XML_FOLDER	= "D:\\data\\";
-	public static String DEFAULT_XML_NAME	= "MessageComment";
-	public static String FILE_EXTENSION		= ".xls";
-	public static String FROM_DATE			= "2015-04-01 00:00:00";
-	public static String TO_DATE			= "2015-06-31 23:59:59";
+	public static String	CONFIG_FILE			= "insaneMonthlyCommentAdder_config_TEST.txt";
+	public static String	DEFAULT_XML_FOLDER	= "D:\\data\\";
+	public static String	DEFAULT_XML_NAME	= "MessageComment";
+	public static String	FILE_EXTENSION		= ".xls";
+	public static String	FROM_DATE			= "2015-04-01 00:00:00";
+	public static String	TO_DATE				= "2015-06-31 23:59:59";
 	
 //	public JangHelper() {}
 	public JangHelper(	int lineCnt,
@@ -127,12 +129,18 @@ public class JangHelper extends JFrame{
 		println("JangHelper end");
 	}//END OF startSwing
 	
-	public static void print(String msg)	{ if(debug) System.out.print(msg); }
-	public static void println(String msg)	{ if(debug) System.out.println(msg); }
+	public static void print(String msg)	{ if(debug) System.out.print(msg);		}
+	public static void println()			{ if(debug) System.out.println();		}
+	public static void println(String msg)	{ if(debug) System.out.println(msg);	}
+	public static void catchErrorPrintln(Exception e, String reason) {
+		if(debug)
+			System.err.println("catch " + e.getClass().getSimpleName() + " : " + reason);
+	}
 	
 	public static void main(String[] args) {
 		
 		try {
+			
 			BufferedReader reader = null;
 			String line = null;
 			String defaultXlsFullPath = DEFAULT_XML_FOLDER + DEFAULT_XML_NAME;
@@ -144,7 +152,8 @@ public class JangHelper extends JFrame{
 			ArrayList<String> empNmList = new ArrayList<String>();
 			int[][] insaneChkList = null;
 			ArrayList<String> fileList = new ArrayList<String>();
-			ArrayList<String> contacList = null;
+//			ArrayList<String> contactList = null;
+			HashSet<String> contactSet = null;
 			int[] fileStatus = null;
 			
 			long appStartTime = System.currentTimeMillis();
@@ -156,7 +165,7 @@ public class JangHelper extends JFrame{
 							new InputStreamReader(new FileInputStream(CONFIG_FILE), "UTF-8"));
 				
 			} catch (FileNotFoundException e) {
-				println("catch FileNotFoundException[1] : config file not found. : " + e.getStackTrace());
+				catchErrorPrintln(e, "config file not found : " + e.getMessage());
 				throw new Exception();
 			}
 			
@@ -169,7 +178,7 @@ public class JangHelper extends JFrame{
 				}
 				reader.close();
 			} catch (IOException e) {
-				println("catch IOException[1] : readLine exception. : " + e.getStackTrace());
+				catchErrorPrintln(e, "readLine exception : " + e.getMessage());
 				throw new Exception();
 			}
 			
@@ -223,17 +232,19 @@ public class JangHelper extends JFrame{
 				try {
 					reader = new BufferedReader(new InputStreamReader(new FileInputStream(fileList.get(fileIndex)), "utf-8"));
 				} catch (UnsupportedEncodingException e) {
-					println("catch UnsupportedEncodingException[1] : input stream reader exception : " + e.getStackTrace());
+					catchErrorPrintln(e, "input stream reader exception : " + e.getMessage());
 					throw new Exception();
 				} catch (FileNotFoundException e) {
-					println("catch FileNotFoundException[2]  : file input stream exception : " + e.getStackTrace());
+					catchErrorPrintln(e, "file input stream exception : " + e.getMessage());
 					throw new Exception();
 				}
 				
-				contacList = new ArrayList<String>();
+//				contactList = new ArrayList<String>();
+				contactSet = new HashSet<String>();
 				
 				try {
 					
+					//boolean fileStatusFlag = false;
 					//START OF WHILE-LOOP : ONE FILE READ
 					while((line=reader.readLine()) != null) {
 														//println(line);
@@ -266,31 +277,32 @@ public class JangHelper extends JFrame{
 							 * 따라서,
 							 * 1. 댓글의 입력날짜가 댓글계산시작날짜(fromDate) 보다 이전이라면, 정상파일을 모두 읽은 것으로 간주.
 							 *    -> 다음파일을 읽는다.
-							 * 2. 이전이 아니고, 댓글계산시작/종료날짜 사이에 있다면, contacList 에 해당 댓글입력자를 추가.
+							 * 2. 이전이 아니고, 댓글계산시작/종료날짜 사이에 있다면, contactList 에 해당 댓글입력자를 추가.
 							 */
 							if(writtenDate.before(fromDate)) {
 								fileStatus[fileIndex] = 0;
 								break;
 							} else if(fromMonth <= writtenMonth && writtenMonth <= toMonth) {
-								//ArrayList 말고 HashSet같은걸 쓰는게 좋을것같다.
+								//ArrayList 말고 HashSet같은걸 쓰는게 좋을것같다. > 수정완료
 								//두번 댓글남겨도 어차피 1번 카운트니까..
-								contacList.add(contacEmpName);
+								//contactList.add(contacEmpName);
+								contactSet.add(contacEmpName);
 							} 
 							
 						}//END OF IF
 					}//END OF WHILE-LOOP : ONE FILE READ
 					
 				} catch (IOException e) {
-					println("catch IOException[2] : read line exception : " + e.getStackTrace());
+					catchErrorPrintln(e, "read line exception : " + e.getMessage());
 					throw new Exception();
 				} catch (ParseException e) {
-					println("catch ParseException[1] : simple date formatter parse exception : " + e.getStackTrace());
+					catchErrorPrintln(e, "simple date formatter parse exception : " + e.getMessage());
 					throw new Exception();
 				} finally {
 					try {
 						reader.close();
 					} catch (IOException e) {
-						println("catch IOException[3] : reader close exception : " + e.getStackTrace());
+						catchErrorPrintln(e, "reader close exception : " + e.getMessage());
 						throw new Exception();
 					}
 				}//END OF TRY/CATCH/FINALLY
@@ -301,8 +313,16 @@ public class JangHelper extends JFrame{
 				 * j : i 팀원이 j 팀원에게 댓글 입력 유무 1/0
 				 */
 				//START OF FOR-LOOP : CHECK CONTACT LIST
-				for(int i=0; i<contacList.size(); i++) {	//연락한놈들만큼 반복
-					String contacNm = contacList.get(i);
+				Iterator<String> itor = contactSet.iterator();
+				while(itor.hasNext()) {
+					String contacNm = itor.next();
+					int contacIndex = empNmList.indexOf(contacNm);
+					if(contacIndex != -1)
+						insaneChkList[contacIndex][fileIndex] = 1;
+				}
+				//START OF FOR-LOOP : CHECK CONTACT LIST
+				/*for(int i=0; i<contactList.size(); i++) {	//연락한놈들만큼 반복
+					String contacNm = contactList.get(i);
 					for(int j=0; j<empNmList.size(); j++) {		//config파일에 적혀있는 팀원만큼 반복
 						if(insaneChkList[j][fileIndex] == 1) {
 							continue;
@@ -311,7 +331,7 @@ public class JangHelper extends JFrame{
 							break;
 						}
 					}
-				}//END OF FOR-LOOP : CHECK CONTACT LIST
+				}*///END OF FOR-LOOP : CHECK CONTACT LIST
 			
 			}//END OF FOR-LOOP : ALL FILE
 
@@ -327,7 +347,7 @@ public class JangHelper extends JFrame{
 					print(insaneChkList[i][j] + " " );
 					insaneChkSum[i] = insaneChkSum[i] + insaneChkList[i][j];
 				}
-				println(null);
+				println();
 			}
 			
 			for(int i=0; i<lineCnt; i++) {
@@ -337,10 +357,10 @@ public class JangHelper extends JFrame{
 			//show result via swing
 			new JangHelper(lineCnt, empNumList, empNmList, insaneChkList, insaneChkSum).startSwing();
 			println("NORMAL EXIT.");
-
-			println("app processing time : " + (System.currentTimeMillis()-appStartTime));
+			long appEndTime = System.currentTimeMillis();
+			println("APP PROCESSING TIME : " + String.format("%.2f", (appEndTime-appStartTime)/1000f ) );
 		 } catch (Exception e) {
-			 println("catch MAIN Exception : " + e.getStackTrace());
+			 catchErrorPrintln(e, e.getMessage());
 		 }//END OF TRY/CATCH
 		
 			
