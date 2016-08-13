@@ -21,6 +21,7 @@ import javax.swing.table.DefaultTableModel;
 
 @SuppressWarnings("serial")
 public class JangHelper extends JFrame{
+	//no meaning
 	private int lineCnt = 0;
 	private ArrayList<String> empNumList = null;			
 	private ArrayList<String> empNmList = null;
