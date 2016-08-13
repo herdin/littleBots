@@ -3,9 +3,9 @@ package com.harm;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-import javax.jdo.JDOHelper;
-import javax.jdo.PersistenceManagerFactory;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -23,8 +23,9 @@ public class DataStoreTestServlet extends HttpServlet {
 	public static int dataId = 1;
 
 	public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
-//		herdinLogging.getInstance().ENTER(this);
-		
+
+		Logger logger = Logger.getLogger(this.getClass().getSimpleName());
+		logger.log(Level.INFO, "ENTER DATA STORE TEST SERVLET");
 //		 PersistenceManagerFactory pmfInstance = JDOHelper.getPersistenceManagerFactory("transactions-optional");
 		 
 		 Key dataKey = KeyFactory.createKey("dataKey", dataId);
@@ -68,6 +69,6 @@ UserService userService = UserServiceFactory.getUserService();
 		 */
 		
 		
-//		herdinLogging.getInstance().LEAVE(this);
+		 logger.log(Level.INFO, "LEAVE DATA STORE TEST SERVLET");
 	}//END OF doGet()
 }//END OF CLASS

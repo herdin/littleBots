@@ -19,6 +19,23 @@
     }
 
     </style>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+        <script>
+    $(document).ready(function(){
+    	console.log("hello, index.html");
+    	var bullet = {
+	    		type : "GET",
+	    		url : "/chgBC",
+	    		data : $(this).serialize(),
+	    		success : function(data) {
+	    			console.log("ajax fire success");
+	    			console.dir(data);
+	    		}	    	
+    	};
+    	console.dir(bullet);
+    	//$.ajax(bullet);
+    });
+    </script>
     <title></title>
   </head>
 
@@ -26,7 +43,7 @@
 	<div class="content">
 		<img src="./images/beyondpromise.png" alt="version : 1" > <br><br>
 		<b>배 현 규 ( Hyunku Bae )</b> <br><br>
-		금융/공공사업본부 금융/공공서비스부문 S/W개발팀<br>
+		금융/공공사업본부 MDD개발팀<br>
 		서울시 영등포구 여의도동 28-1 전경련회관 33층<br>
 		<font style="color: #D80546; font-weight: bold;">Mail</font> : herdin@lgcns.com |
 		<font style="color: #D80546; font-weight: bold;">Mobile</font> : 010-4707-0956

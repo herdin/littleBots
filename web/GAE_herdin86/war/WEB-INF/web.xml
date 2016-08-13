@@ -4,6 +4,7 @@ xmlns="http://java.sun.com/xml/ns/javaee"
 xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
 xsi:schemaLocation="http://java.sun.com/xml/ns/javaee
 http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" version="2.5">
+	<!-- MAIN -->
 	<servlet>
 		<servlet-name>MainServlet</servlet-name>
 		<servlet-class>com.harm.MainServlet</servlet-class>
@@ -11,9 +12,21 @@ http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" version="2.5">
 	
 	<servlet-mapping>
 		<servlet-name>MainServlet</servlet-name>
-		<url-pattern>/*</url-pattern>
+		<url-pattern>/</url-pattern>
 	</servlet-mapping>
+
+	<!-- CHANGE BUSINESS CARD -->
+	<servlet>
+		<servlet-name>chgBCPos</servlet-name>
+		<servlet-class>com.harm.chgBCPosServlet</servlet-class>
+	</servlet>
 	
+	<servlet-mapping>
+		<servlet-name>chgBCPos</servlet-name>
+		<url-pattern>/chgBCPos</url-pattern>
+	</servlet-mapping>
+		
+	<!-- DATA STORE TEST -->		
 	<servlet>
 		<servlet-name>DataStoreTest</servlet-name>
 		<servlet-class>com.harm.DataStoreTestServlet</servlet-class>
@@ -21,13 +34,12 @@ http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" version="2.5">
 	
 	<servlet-mapping>
 		<servlet-name>DataStoreTest</servlet-name>
-		<url-pattern>/dt</url-pattern>
+		<url-pattern>/test/dt</url-pattern>
 	</servlet-mapping>
 	
-	
-	
+	<!-- WELCOME PAGE 	
 	<welcome-file-list>
 		<welcome-file>index.html</welcome-file>
-	</welcome-file-list>
+	</welcome-file-list>-->
 	
 </web-app>

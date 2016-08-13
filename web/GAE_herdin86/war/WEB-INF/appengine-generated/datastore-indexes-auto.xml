@@ -1,4 +1,10 @@
-<!-- Indices written at Sat, 31 Jan 2015 14:33:35 KST -->
+<!-- Indices written at Sat, 13 Aug 2016 21:26:50 KST -->
 
-<datastore-indexes/>
+<datastore-indexes>
 
+    <!-- Used 1 time in query history -->
+    <datastore-index kind="BC_KIND" ancestor="true" source="auto">
+        <property name="REGIST_DATE" direction="desc"/>
+    </datastore-index>
+
+</datastore-indexes>
