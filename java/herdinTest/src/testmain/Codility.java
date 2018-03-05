@@ -3,32 +3,69 @@ package testmain;
 public class Codility {
 
 	public static void main(String[] args) {
-		Codility.Ferrum_2018();
+//		Codility.Ferrum_2018();
+		Codility.Cobaltum_2018();
+	}//END OF FUNCTION
+	
+	public static void Cobaltum_2018() {
+		int[] A = {5, 3, 7, 7, 10};
+		int[] B = {1, 6, 6, 9, 9};
+		
+		for(int a : A)
+			System.out.print(a + " ");
+		System.out.println();
+		for(int b : B)
+			System.out.print(b + " ");
+		System.out.println();
+//		int[] diffA = new int[A.length];
+//		int[] diffB = new int[A.length];
+//		for(int i=0; i<A.length; i++) {
+//			if(i==0) {
+//				diffA[i] = A[i];
+//				diffB[i] = B[i];
+//			} else {
+//				diffA[i] = A[i]-A[i-1];
+//				diffB[i] = B[i]-B[i-1];
+//			}
+//		}
+//		
+//		for(int a : diffA)
+//			System.out.print(a + " ");
+//		System.out.println();
+//		for(int b : diffB)
+//			System.out.print(b + " ");
+//		System.out.println();
+		int swapCnt = 0;
+		for(int i=0; i<A.length; i++) {
+			if(
+				(i<=A.length-2) &&
+				(	(	A[i]>=A[i+1] && A[i]<B[i+1] && B[i]<A[i+1] &&
+						(0<A.length && A[i-1]<B[i]) &&
+						(i<=A.length-3 && )
+					)
+					||
+					(	B[i] >= B[i+1] && B[i] < A[i+1] && A[i] < B[i+1] &&
+					)
+				)
+			){
+				int tmp = A[i];
+				A[i] = B[i];
+				B[i] = tmp;
+				swapCnt++;
+			}
+		}
+		System.out.println(swapCnt);
+		for(int a : A)
+			System.out.print(a + " ");
+		System.out.println();
+		for(int b : B)
+			System.out.print(b + " ");
+		System.out.println();
 	}//END OF FUNCTION
 	
 	public static void Ferrum_2018() {
-		int[] A = new int[9];
-		//     1   2           6   7
-		//[−1, −1, 1, −1, 1, 0, 1, −1, −1]
-		A[0] = -1;
-		A[1] = -1;
-		A[2] = 1;
-		A[3] = -1;
-		A[4] = 1;
-		A[5] = 0;
-		A[6] = 1;
-		A[7] = -1;
-		A[8] = -1;
-		//[1, 1, −1, −1, −1, −1, −1, 1, 1]
-//		A[0] = 1;
-//		A[1] = 1;
-//		A[2] = -1;
-//		A[3] = -1;
-//		A[4] = -1;
-//		A[5] = -1;
-//		A[6] = -1;
-//		A[7] = 1;
-//		A[8] = 1;
+		int[] A = {-1, -1, 1, -1, 1, 0, 1, -1, -1};
+//		int[] A = {1, 1, -1, -1, -1, -1, -1, 1, 1};
 		int maxLength = 0;
 		for(int i=0; i<A.length; i++) {
 			int tmpSum = 0;
