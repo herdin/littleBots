@@ -1,18 +1,15 @@
 package testmain;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.ListIterator;
-import java.util.Stack;
 
 public class Codility {
     
     public static void main(String[] args) {
 //      Codility.Ferrum_2018();
 //      Codility.Cobaltum_2018();
-        Codility.Manganum_2017();
+        System.out.println("Codility.Manganum_2017() : " + Codility.Manganum_2017());
     }//END OF FUNCTION
     
     public static void Lesson1_Iterations() {
@@ -227,7 +224,7 @@ public class Codility {
 //        int[] Y = {4, 8, 2, 3, 1, 6};
 //        String T = "ppqpXp"; // return 12
         
-        boolean isLocal = true;
+        final boolean isLocal = true;
         int maxScore = -1;
         char[] Tch = T.toCharArray();
         if(X.length != Y.length || X.length != Tch.length) return maxScore;
@@ -272,6 +269,7 @@ public class Codility {
                 Integer key = (Integer) iter.next();
                 System.out.println(key + " : " + hashCoord.get(key));
             }
+            System.out.println();
         }
          
         class littleSolution {
@@ -290,29 +288,29 @@ public class Codility {
                 this.hashCoord = hashCoord;
             }//END OF FUNCTION
             
-            public int getMaxScore(int curX, int curY, int preX, int preY) {
+            public int getMaxScore(int preX, int preY, int curX, int curY) {
                 //up-left, fixed : x1-n, y1+n = x3, y3 : x1+y1 = x3+y3
                 //fixed up-right : x1+n, y1+n = x2, y2 : x1-y1 = x2-y2
                 int maxScore = 0;
                 
                 for(int i=0; i<X.length; i++) {
                     int tmpScore = 0;
-                    
+                    if(isLocal) System.out.println("i : " + i + " : X, Y : " + X[i] + ", " + Y[i]);
                     if(Tch[i] != 'X' && curY < Y[i]) {
-                        //up-left
-                        if(X[i] < curX) {
-                        }
-                        //up-right
-                        else if(curX < X[i]) {
-                        }
-                        //even
-                        else {
+                        if(isLocal) System.out.println("ok 1");
+                        point p = getLandingPoint(preX, preY, curX, curY, X[i], Y[i]);
+                        if(p != null) {
+                            if(isLocal) System.out.println("ok 2 : " + p.x + ", " + p.y);
+                            tmpScore = (Tch[i] == 'p')? 1:10;
+                            tmpScore += getMaxScore(curX, curY, p.x, p.y);
                         }
                     }
                     
                     if(tmpScore > maxScore) {
                         maxScore = tmpScore;
                     }
+                    
+                    if(isLocal) System.out.println("maxScore : " + maxScore);
                     
                 }//END OF FOR-LOOP
                 
@@ -337,16 +335,37 @@ public class Codility {
                 //up-left  : (x1-n, y1+n) = (x3-m, y3-m) : n = {(x1-y1)-(x3-y3)}/2
                 //up-right : (x1+n, y1+n) = (x2+m, y2-m) : n = {(x2+y2)-(x1+y1)}/2
                 point p = null;
-                if(curX <= preX && curY >=  preY) {
-                    //default up-left
-                    if(((curX-curY)-(posX-posY))%2 == 0) {
+                //default, up-left
+                if(curX <= preX && curY >= preY) {
+                    if( ((curX-curY)-(posX-posY))%2 == 0 ) {
                         int n = ((curX-curY)-(posX-posY))/2;
                         int metX = curX - n;
                         int metY = curY + n;
-                        if(metX == curX && metY == curY) {
+                        if( (metX == curX && metY == curY) || (metY <= posY && metY > curY && !(curX == preX && curY == preY)) ) {
                             if(isValidCoordinate(posX-1, posY-1) && isValidCoordinate(posX+1, posY+1)) {
                                 p = new point();
                                 p.x = posX+1;
+                                p.y = posY+1;
+                            }
+                        } else if(metX == posX && metY == posY) {
+                            if(isValidCoordinate(posX+1, posY-1) && isValidCoordinate(posX-1, posY+1)) {
+                                p = new point();
+                                p.x = posX-1;
+                                p.y = posY+1;
+                            }
+                        }
+                    }
+                }
+                //up-right
+                else {
+                    if( ((posX+posY)-(curX+curY))%2 == 0 ) {
+                        int n = ((posX+posY)-(curX+curY))/2;
+                        int metX = curX + n;
+                        int metY = curY + n;
+                        if( (metX == curX && metY == curY) || (metY <= posY && metY > curY) ) {
+                            if(isValidCoordinate(posX+1, posY-1) && isValidCoordinate(posX-1, posY+1)) {
+                                p = new point();
+                                p.x = posX-1;
                                 p.y = posY+1;
                             }
                         } else if(metX == posX && metY == posY) {
@@ -355,19 +374,16 @@ public class Codility {
                                 p.x = posX+1;
                                 p.y = posY+1;
                             }
-                        } else if(metY <= posY) {
-                            
                         }
                     }
-                } else {
-                    
                 }
                 return p;
             }//END OF FUNCTION
         }//END OF INNER-CLASS
         
+        maxScore = new littleSolution(X, Y, Tch, hashCoord).getMaxScore(curX, curY, curX, curY);
         
-        System.out.println("max score : " + new littleSolution(X, Y, Tch, hashCoord).getMaxScore(curX, curY, curX, curY));
+        if(isLocal) System.out.println("max score : " + maxScore);
         
         return maxScore;
     }//END OF FUNCTION
