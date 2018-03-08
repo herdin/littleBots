@@ -7,7 +7,7 @@ import java.util.Iterator;
 public class Codility {
     
     public static void main(String[] args) {
-//      Codility.Ferrum_2018();
+//      Codility.Ferrum_2018();;
 //      Codility.Cobaltum_2018();
         System.out.println("Codility.Manganum_2017() : " + Codility.Manganum_2017());
     }//END OF FUNCTION
