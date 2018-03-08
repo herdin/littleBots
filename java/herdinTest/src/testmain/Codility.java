@@ -7,7 +7,7 @@ import java.util.Iterator;
 public class Codility {
     
     public static void main(String[] args) {
-//      Codility.Ferrum_2018();;
+//      Codility.Ferrum_2018();
 //      Codility.Cobaltum_2018();
         System.out.println("Codility.Manganum_2017() : " + Codility.Manganum_2017());
     }//END OF FUNCTION
@@ -218,7 +218,7 @@ public class Codility {
         int[] Y = null;
         String T = null;
         int expectResult = -1;
-        final int TEST_CASE_NUMBER = 12;
+        final int TEST_CASE_NUMBER = 3;
         switch(TEST_CASE_NUMBER) {
             case 1 :
                 int[] X1 = {3, 5, 1, 6};
@@ -456,18 +456,17 @@ public class Codility {
                 System.out.println();
             }//END OF FUNCTION
             
-            public int getMaxScore(int preX, int preY, int curX, int curY) {
+            public Object[] getMaxScore(int preX, int preY, int curX, int curY) {
                 depth++;
                 //up-left, fixed : x1-n, y1+n = x3, y3 : x1+y1 = x3+y3
                 //fixed up-right : x1+n, y1+n = x2, y2 : x1-y1 = x2-y2
                 int maxScore = 0;
+                ArrayList<point> points = null;
                 //TODO 맥스 스코어랑 현재 스코어 + 내위에 있는 체커들 스코어 합 대비 계산
-                if(curY > maxY) {
-                    return maxScore;
-                }
                 
-                for(int i=0; i<X.length; i++) {
+                for(int i=0; i<X.length && curY<maxY; i++) {
                     int tmpScore = 0;
+                    ArrayList<point> tmpPoints = null;
                     
                     point met = getMeetPoint(preX, preY, curX, curY, X[i], Y[i]);
                     if(met == null) {
@@ -483,18 +482,31 @@ public class Codility {
                         if(lan != null) {
                             printDebug(" : landing point : " + lan.x + ", " + lan.y);
                             tmpScore = (Tch[i] == 'p')? 1:10;
-                            tmpScore += getMaxScore(curX, curY, lan.x, lan.y);
+                            Object[] objs = getMaxScore(curX, curY, lan.x, lan.y);
+                            tmpScore += (Integer)objs[0];
+                            tmpPoints = (ArrayList<point>)objs[1];
+                            if(tmpPoints == null) {
+                                tmpPoints = new ArrayList<>();
+                                tmpPoints.add(new point(X[i], Y[i]));
+                            } else {
+                                tmpPoints.add(new point(X[i], Y[i]));
+                            }
                         }
                     }
                     
                     if(tmpScore > maxScore) {
                         maxScore = tmpScore;
+                        points = tmpPoints;
                     }
                     
                     printDebug(" : i : " + i + " : (preX, preY) (" + preX + ", " + preY + ") : (curX, curY) : (" + curX + ", " + curY + ") : (posX, posY) : (" + X[i] + ", " + Y[i] + ") : end : maxScore : " + maxScore);
                 }//END OF FOR-LOOP
                 depth--;
-                return maxScore;
+                
+                Object[] objects = new Object[2];
+                objects[0] = Integer.valueOf(maxScore);
+                objects[1] = points;
+                return objects;
             }//END OF FUNCTION
             
             /** true  : if there is no middle point between (curX, curY) and (posX, posY) */
@@ -645,9 +657,16 @@ public class Codility {
             
         }//END OF INNER-CLASS
         
-        maxScore = new littleSolution(X, Y, Tch, maxY, hashCoord, hashInclL, hashInclR).getMaxScore(curX, curY, curX, curY);
-        
+        Object[] objects = new littleSolution(X, Y, Tch, maxY, hashCoord, hashInclL, hashInclR).getMaxScore(curX, curY, curX, curY);
+        maxScore = (Integer)objects[0];
+        ArrayList<point> points = (ArrayList<point>)objects[1];
         if(isLocal) {
+            System.out.println("POINT LIST : ");
+            if(points != null)
+                for(point point : points) {
+                    System.out.print("(" + point.x + ", " + point.y + ") ");
+                }
+            System.out.println();
             System.out.flush();
             System.err.println(TEST_CASE_NUMBER + "th TEST CASE, EXPECTED RESULT : " + expectResult + " : RESULT : " + maxScore + " : " + (expectResult == maxScore));
             System.err.flush();
