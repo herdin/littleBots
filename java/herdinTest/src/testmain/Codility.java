@@ -218,7 +218,7 @@ public class Codility {
         int[] Y = null;
         String T = null;
         int expectResult = -1;
-        final int TEST_CASE_NUMBER = 3;
+        final int TEST_CASE_NUMBER = 12;
         switch(TEST_CASE_NUMBER) {
             case 1 :
                 int[] X1 = {3, 5, 1, 6};
@@ -476,7 +476,24 @@ public class Codility {
                     }
                     
                     if(Tch[i] != 'X' && curY < Y[i] && met !=  null && isPromise(curX, curY, met.x, met.y, X[i], Y[i])) {
-                        printDebug(" : promise point");
+                        
+                        if(tmpPoints != null) {
+                            boolean isVisited = false;
+                            for(point point : tmpPoints) {
+                                if(X[i] == point.x && Y[i] == point.y) {
+                                    isVisited = true;
+                                    break;
+                                }
+                            }
+                            if(isVisited) {
+                                printDebug(" : promise point but already gone.");
+                                continue;
+                            } else {
+                                printDebug(" : promise point.");
+                            }
+                        } else {
+                            printDebug(" : promise point.");
+                        }
                         
                         point lan = getLandingPoint(preX, preY, curX, curY, X[i], Y[i]);
                         if(lan != null) {
